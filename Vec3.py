@@ -1,30 +1,15 @@
 import math
+from dataclasses import dataclass
 from typing import Sequence
 
 from Number import Number
 
 
+@dataclass(frozen=True)
 class Vec3:
-    _x: Number
-    _y: Number
-    _z: Number
-
-    def __init__(self,
-                 x: Number = 0,
-                 y: Number = 0,
-                 z: Number = 0):
-        """
-        初始化三维向量，使用给定的三个分量设置 x、y、z 坐标。
-
-        Args:
-            x (Number): x 轴方向的分量，取值类型为 float 或 int。
-            y (Number): y 轴方向的分量，取值类型为 float 或 int。
-            z (Number): z 轴方向的分量，取值类型为 float 或 int。
-        """
-
-        self._x = x
-        self._y = y
-        self._z = z
+    x: Number = 0
+    y: Number = 0
+    z: Number = 0
 
     @classmethod
     def from_sequence(cls, value: Sequence[Number]):
@@ -50,36 +35,6 @@ class Vec3:
 
         return cls(x, y, z)
 
-    @property
-    def x(self) -> Number:
-        """
-        向量的 x 分量（只读属性）。
-
-        Returns:
-            Number: x 轴方向的分量
-        """
-        return self._x
-
-    @property
-    def y(self) -> Number:
-        """
-        向量的 y 分量（只读属性）。
-
-        Returns:
-            Number: y 轴方向的分量
-        """
-        return self._y
-
-    @property
-    def z(self) -> Number:
-        """
-        向量的 z 分量（只读属性）。
-
-        Returns:
-            Number: z 轴方向的分量
-        """
-        return self._z
-
     def __neg__(self) -> "Vec3":
         """
         一元负号运算符（-v），返回各分量取反的新向量。
@@ -88,7 +43,7 @@ class Vec3:
         Returns:
             Vec3: 各分量取反后的新向量
         """
-        return Vec3(-self._x, -self._y, -self._z)
+        return Vec3(-self.x, -self.y, -self.z)
 
     def __getitem__(self, i: int) -> Number:
         """
@@ -105,11 +60,11 @@ class Vec3:
             IndexError: 当索引不在 0~2 范围内时抛出
         """
         if i == 0:
-            return self._x
+            return self.x
         if i == 1:
-            return self._y
+            return self.y
         if i == 2:
-            return self._z
+            return self.z
         raise IndexError("Vec3 index out of range")
 
     def __add__(self, other: "Vec3") -> Vec3:
@@ -123,7 +78,7 @@ class Vec3:
         Returns:
             Vec3: 分量相加后的新向量
         """
-        return Vec3(self._x + other.x, self._y + other.y, self._z + other.z)
+        return Vec3(self.x + other.x, self.y + other.y, self.z + other.z)
 
     def __sub__(self, other: Vec3) -> Vec3:
         """
@@ -136,7 +91,7 @@ class Vec3:
         Returns:
             Vec3: 分量相减后的新向量
         """
-        return Vec3(self._x - other.x, self._y - other.y, self._z - other.z)
+        return Vec3(self.x - other.x, self.y - other.y, self.z - other.z)
 
     def __mul__(self, other: "Vec3 | Number") -> Vec3:
         """
@@ -151,8 +106,8 @@ class Vec3:
             Vec3: 相乘后的新向量
         """
         if isinstance(other, Vec3):
-            return Vec3(self._x * other.x, self._y * other.y, self._z * other.z)
-        return Vec3(self._x * other, self._y * other, self._z * other)
+            return Vec3(self.x * other.x, self.y * other.y, self.z * other.z)
+        return Vec3(self.x * other, self.y * other, self.z * other)
 
     def __rmul__(self, other: "Number") -> Vec3:
         """
@@ -179,8 +134,8 @@ class Vec3:
             Vec3: 相除后的新向量
         """
         if isinstance(other, Vec3):
-            return Vec3(self._x / other.x, self._y / other.y, self._z / other.z)
-        return Vec3(self._x / other, self._y / other, self._z / other)
+            return Vec3(self.x / other.x, self.y / other.y, self.z / other.z)
+        return Vec3(self.x / other, self.y / other, self.z / other)
 
     def __eq__(self, other: object) -> bool:
         """
@@ -196,7 +151,7 @@ class Vec3:
         """
         if not isinstance(other, Vec3):
             return NotImplemented
-        return self._x == other.x and self._y == other.y and self._z == other.z
+        return self.x == other.x and self.y == other.y and self.z == other.z
 
     def length_squared(self) -> float:
         """
@@ -206,7 +161,7 @@ class Vec3:
         Returns:
             float: 各分量平方和
         """
-        return self._x ** 2 + self._y ** 2 + self._z ** 2
+        return self.x ** 2 + self.y ** 2 + self.z ** 2
 
     def near_zero(self) -> bool:
         """
@@ -217,7 +172,7 @@ class Vec3:
             bool: 当 x、y、z 三个分量的绝对值都小于 1e-8 时返回 True
         """
         s: Number = 1e-8
-        return abs(self._x) < s and abs(self._y) < s and abs(self._z) < s
+        return abs(self.x) < s and abs(self.y) < s and abs(self.z) < s
 
     def length(self) -> float:
         """
@@ -240,7 +195,7 @@ class Vec3:
         Returns:
             Number: 各分量乘积之和（x1*x2 + y1*y2 + z1*z2）
         """
-        return self._x * other.x + self._y * other.y + self._z * other.z
+        return self.x * other.x + self.y * other.y + self.z * other.z
 
     def unit_vector(self) -> Vec3:
         """
@@ -262,7 +217,7 @@ class Vec3:
         Returns:
             str: 包含三个分量的字符串表示
         """
-        return f"Vec3({self._x}, {self._y}, {self._z})"
+        return f"Vec3({self.x}, {self.y}, {self.z})"
 
     def cross(self, other: Vec3) -> Vec3:
         """
@@ -278,9 +233,9 @@ class Vec3:
             Vec3: 叉积得到的新向量
         """
         return Vec3(
-            self._y * other.z - self._z * other.y,
-            self._z * other.x - self._x * other.z,
-            self._x * other.y - self._y * other.x,
+            self.y * other.z - self.z * other.y,
+            self.z * other.x - self.x * other.z,
+            self.x * other.y - self.y * other.x,
         )
 
     @staticmethod
