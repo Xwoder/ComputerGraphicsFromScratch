@@ -35,7 +35,7 @@ class Vec3:
 
         return cls(x, y, z)
 
-    def __neg__(self) -> "Vec3":
+    def __neg__(self) -> Vec3:
         """
         一元负号运算符（-v），返回各分量取反的新向量。
         对应 C++ 的 vec3 operator-() const。
@@ -67,7 +67,7 @@ class Vec3:
             return self.z
         raise IndexError("Vec3 index out of range")
 
-    def __add__(self, other: "Vec3") -> Vec3:
+    def __add__(self, other: Vec3) -> Vec3:
         """
         向量加法（v + u），返回新向量（对应 C++ 的 operator+）。
         不修改原向量。
