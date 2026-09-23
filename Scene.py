@@ -13,6 +13,3 @@ class Scene:
 
     spheres: list[Sphere]
     BACKGROUND_COLOR: ClassVar[Color] = BLACK
-
-    def add(self, s: Sphere) -> None:
-        self.spheres.append(s)
