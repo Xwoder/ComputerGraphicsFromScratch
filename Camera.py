@@ -5,8 +5,18 @@ from Viewport import Viewport
 
 
 class Camera:
-    _center: Point3 = Point3(0, 0, 0)
-    _direction: Vec3 = Vec3(0, 0, -1)
+    _origin: Point3 = Point3(0, 0, 0)
+    _direction: Vec3 = Vec3(0, 0, 1)
+
+    @property
+    def origin(self) -> Point3:
+        """
+        相机位置（即所有视线的起点，只读属性）。
+
+        Returns:
+            Point3: 相机所在的三维点
+        """
+        return self._origin
 
     def __repr__(self) -> str:
         """
@@ -17,7 +27,7 @@ class Camera:
             str: 包含相机位置与朝向的字符串表示
         """
         return (f"Camera("
-                f"center={self._center!r}, "
+                f"center={self._origin!r}, "
                 f"direction={self._direction!r})")
 
     @staticmethod
