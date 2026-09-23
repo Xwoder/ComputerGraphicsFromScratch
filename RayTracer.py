@@ -22,15 +22,9 @@ class RayTracer:
         closest_sphere: Sphere | None = None
 
         for sphere in self._scene.spheres:
-            t1, t2 = sphere.intersect(ray)
-
-            if t1 in interval and t1 < closest_t:
-                closest_t = t1
-                closest_sphere = sphere
-
-            if t2 in interval and t2 < closest_t:
-                closest_t = t2
-                closest_sphere = sphere
+            for t in sphere.intersect(ray):
+                if t in interval and t < closest_t:
+                    closest_t, closest_sphere = t, sphere
 
         if closest_sphere is not None:
             return closest_sphere.color
