@@ -49,14 +49,14 @@ class Renderer:
 
         canvas: Canvas = self._canvas
 
-        for col in range(canvas.height):
-            for row in range(canvas.width):
+        for y in range(canvas.height):
+            for x in range(canvas.width):
                 target: Point3 = Camera.canvasToViewport(
                     canvas,
                     self._viewport,
-                    row,
-                    col,
+                    x,
+                    y,
                 )
                 ray: Ray = Ray(self._camera.origin, target - self._camera.origin)
 
-                canvas.putPixel(row, col, tracer.traceRay(ray, interval))
+                canvas.putPixel(x, y, tracer.traceRay(ray, interval))
