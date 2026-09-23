@@ -1,13 +1,13 @@
 from pathlib import Path
 
-from Color import Color
+from Color import BLACK, Color
 
 
 class Canvas:
     _width: int = 800
     _height: int = 600
     _pixels: list[list[Color]]
-    __defaultColor: Color = Color.Black
+    __defaultColor: Color = BLACK
 
     def __init__(self,
                  width: int,
