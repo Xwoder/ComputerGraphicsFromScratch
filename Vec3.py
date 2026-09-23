@@ -34,13 +34,9 @@ class Vec3:
         Raises:
             IndexError: 当索引不在 0~2 范围内时抛出
         """
-        if i == 0:
-            return self.x
-        if i == 1:
-            return self.y
-        if i == 2:
-            return self.z
-        raise IndexError("Vec3 index out of range")
+        if not 0 <= i <= 2:
+            raise IndexError("Vec3 index out of range")
+        return (self.x, self.y, self.z)[i]
 
     def __add__(self, other: Vec3) -> Vec3:
         """
