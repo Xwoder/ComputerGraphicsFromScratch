@@ -18,3 +18,11 @@ class Canvas:
 
     def get_pixel(self, x: int, y: int) -> Color:
         return self._pixels[y][x]
+
+    @property
+    def width(self) -> int:
+        return self._width
+
+    @property
+    def height(self) -> int:
+        return self._height
