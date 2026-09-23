@@ -1,6 +1,5 @@
 import math
 from dataclasses import dataclass
-from typing import Sequence
 
 from Number import Number
 
@@ -10,30 +9,6 @@ class Vec3:
     x: Number = 0
     y: Number = 0
     z: Number = 0
-
-    @classmethod
-    def from_sequence(cls, value: Sequence[Number]):
-        """
-        从包含三个分量的序列构造 Vec3 实例
-
-        Args:
-            value (Sequence[Number]): 包含三个数值分量的序列（如列表或元组）
-
-        Returns:
-            Vec3: 由序列中三个分量依次作为 x、y、z 构造的向量实例
-
-        Raises:
-            ValueError: 当序列长度不等于 3 时抛出
-        """
-
-        if len(value) != 3:
-            raise ValueError("Vec3 requires exactly 3 values")
-
-        x = value[0]
-        y = value[1]
-        z = value[2]
-
-        return cls(x, y, z)
 
     def __neg__(self) -> Vec3:
         """
