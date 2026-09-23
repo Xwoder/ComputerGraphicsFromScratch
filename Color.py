@@ -1,6 +1,18 @@
-from Vec3 import Vec3
+class Color:
+    _red: int
+    _green: int
+    _blue: int
 
-Color = Vec3
+    def __init__(self,
+                 red: int,
+                 green: int,
+                 blue: int) -> None:
+        super().__init__()
 
-BlackColor = Color(0, 0, 0)
-WhiteColor = Color(255, 255, 255)
+        self._red = red
+        self._green = green
+        self._blue = blue
+
+
+Color.Black: Color = Color(0, 0, 0)
+Color.White: Color = Color(255, 255, 255)
