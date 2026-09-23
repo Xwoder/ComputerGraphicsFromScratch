@@ -11,11 +11,13 @@ from Sphere import Sphere
 from Viewport import Viewport
 
 if __name__ == '__main__':
-    CANVAS_WIDTH: int = 1600
-    CANVAS_HEIGHT: int = 1200
+    CANVAS_WIDTH: int = 800
+    CANVAS_HEIGHT: int = 600
     canvas: Canvas = Canvas(CANVAS_WIDTH, CANVAS_HEIGHT)
-    # 视口宽高比与画布保持一致（800:600 = 4:3），避免图像被拉伸
-    viewportWidth: Number = 4
+    # 视口宽高比与画布保持一致（800:600 = 4:3），避免图像被拉伸。
+    # 视口宽度取 1（世界单位）：过宽会让视野(FOV)过大，导致球体显得过小而完整落在画面内；
+    # 取 1 时三个球会因超出画面边界而被裁切，符合预期。
+    viewportWidth: Number = 1
     viewport: Viewport = Viewport(width=viewportWidth,
                                   height=viewportWidth * CANVAS_HEIGHT / CANVAS_WIDTH,
                                   distance=1.0)
@@ -26,12 +28,11 @@ if __name__ == '__main__':
         Sphere(center=Point3(2, 0, 4), radius=1, color=Color(0, 0, 255)),
         Sphere(center=Point3(-2, 0, 4), radius=1, color=Color(0, 255, 0)),
     ]
-
     scene: Scene = Scene(spheres)
-    renderer: Renderer = Renderer(scene, canvas, camera, viewport)
 
+    renderer: Renderer = Renderer(scene, canvas, camera, viewport)
     renderer.render()
+
     OUTPUT_PATH: Path = Path("output.ppm")
     canvas.savePPM(OUTPUT_PATH)
-
     print(f"saved: {OUTPUT_PATH}")
