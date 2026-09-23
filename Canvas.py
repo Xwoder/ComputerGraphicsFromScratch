@@ -35,3 +35,7 @@ class Canvas:
     @property
     def height(self) -> int:
         return self._height
+
+    @property
+    def defaultColor(self) -> Color:
+        return self.__defaultColor
