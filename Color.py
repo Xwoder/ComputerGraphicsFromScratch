@@ -17,6 +17,36 @@ class Color:
         self._green = green
         self._blue = blue
 
+    @property
+    def red(self) -> int:
+        """
+        红色分量（只读属性）。
+
+        Returns:
+            int: 红色分量，取值 0~255
+        """
+        return self._red
+
+    @property
+    def green(self) -> int:
+        """
+        绿色分量（只读属性）。
+
+        Returns:
+            int: 绿色分量，取值 0~255
+        """
+        return self._green
+
+    @property
+    def blue(self) -> int:
+        """
+        蓝色分量（只读属性）。
+
+        Returns:
+            int: 蓝色分量，取值 0~255
+        """
+        return self._blue
+
     def __repr__(self) -> str:
         return f"Color({self._red}, {self._green}, {self._blue})"
 
