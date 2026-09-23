@@ -1,9 +1,6 @@
-import math
-
 from Camera import Camera
 from Canvas import Canvas
-from Interval import Interval
-from Point3 import Point3
+from Color import Color
 from Ray import Ray
 from RayTracer import RayTracer
 from Scene import Scene
@@ -37,26 +34,27 @@ class Renderer:
         self._viewport = viewport
 
     def render(self) -> None:
-        """
-        逐像素追踪光线并写入画布。
+        scene = self._scene
+        tracer = RayTracer(scene)
 
-        对每个像素：画布坐标 -> 视口坐标 -> 由相机原点指向该点的射线 -> 求最近命中球。
-        t 的有效区间取 [1, +inf)，即只接受位于视口前方（含视口平面之后）的交点。
-        """
-
-        tracer: RayTracer = RayTracer(self._scene)
-        interval: Interval = Interval(1, math.inf)
-
-        canvas: Canvas = self._canvas
-
+        canvas = self._canvas
         for y in range(canvas.height):
             for x in range(canvas.width):
-                target: Point3 = Camera.canvasToViewport(
+                target = Camera.canvasToViewport(
                     canvas,
                     self._viewport,
                     x,
                     y,
                 )
-                ray: Ray = Ray(self._camera.origin, target - self._camera.origin)
 
-                canvas.putPixel(x, y, tracer.traceRay(ray, interval))
+                ray = Ray(
+                    self._camera.origin,
+                    target - self._camera.origin,
+                )
+
+                color: Color = tracer.traceRay(ray)
+                canvas.putPixel(
+                    x,
+                    y,
+                    color,
+                )
