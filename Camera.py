@@ -1,5 +1,7 @@
+from Canvas import Canvas
 from Point3 import Point3
 from Vec3 import Vec3
+from Viewport import Viewport
 
 
 class Camera:
@@ -17,3 +19,17 @@ class Camera:
         return (f"Camera("
                 f"center={self._center!r}, "
                 f"direction={self._direction!r})")
+
+    @staticmethod
+    def canvasToViewport(
+            canvas: Canvas,
+            viewport: Viewport,
+            canvasX: int,
+            canvasY: int
+    ) -> Point3:
+
+        viewportX = canvasX * viewport.width / canvas.width
+        viewportY = canvasY * viewport.height / canvas.height
+        viewportZ = viewport.distance
+
+        return Point3(x=viewportX, y=viewportY, z=viewportZ)
