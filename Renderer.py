@@ -35,15 +35,16 @@ class Renderer:
         self._viewport = viewport
 
     def render(self) -> None:
+        canvas = self._canvas
         scene = self._scene
         tracer = RayTracer(scene)
+        viewport = self._viewport
 
-        canvas = self._canvas
         for y in range(canvas.height):
             for x in range(canvas.width):
                 target: Point3 = Camera.canvasToViewport(
                     canvas,
-                    self._viewport,
+                    viewport,
                     x,
                     y,
                 )
@@ -51,7 +52,7 @@ class Renderer:
                 ray: Ray = Ray(
                     self._camera.origin,
                     target - self._camera.origin,
-                )
+                    )
 
                 color: Color = tracer.traceRay(ray)
                 canvas.putPixel(
