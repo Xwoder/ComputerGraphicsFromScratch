@@ -1,4 +1,8 @@
 class Color:
+    # 先在类体内声明（仅注解，不赋值），类创建后再赋值，静态检查器才能解析 Color.Black / Color.White
+    Black: Color
+    White: Color
+
     _red: int
     _green: int
     _blue: int
@@ -14,5 +18,5 @@ class Color:
         self._blue = blue
 
 
-Color.Black: Color = Color(0, 0, 0)
-Color.White: Color = Color(255, 255, 255)
+Color.Black = Color(0, 0, 0)
+Color.White = Color(255, 255, 255)
