@@ -1,11 +1,20 @@
-from dataclasses import dataclass
-
-from Number import Number
-from Vec3 import Vec3
+from Color import Color
 
 
-@dataclass
 class Canvas:
-    width: Number = 800
-    height: Number = 600
-    pixels: list[list[Vec3]]
+    _width: int = 800
+    _height: int = 600
+    _pixels: list[list[Color]]
+
+    def __init__(self, width: int, height: int) -> None:
+        super().__init__()
+
+        self._width = width
+        self._height = height
+        self._pixels = [[Color(0, 0, 0) for _ in range(width)] for _ in range(height)]
+
+    def set_pixel(self, x: int, y: int, color: Color) -> None:
+        self._pixels[y][x] = color
+
+    def get_pixel(self, x: int, y: int) -> Color:
+        return self._pixels[y][x]
