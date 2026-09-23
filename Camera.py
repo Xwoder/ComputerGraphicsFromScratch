@@ -1,11 +1,13 @@
 from dataclasses import dataclass
 
 from Point3 import Point3
+from Vec3 import Vec3
 
 
 @dataclass(frozen=True)
 class Camera:
     center: Point3 = Point3(0, 0, 0)
+    direction: Vec3 = Vec3(0, 0, -1)
 
     def __repr__(self) -> str:
         return f"Camera(center={self.center!r})"
