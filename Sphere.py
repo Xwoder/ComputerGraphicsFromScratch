@@ -81,20 +81,20 @@ class Sphere:
         """
 
         oc = ray.origin - self._center
-        a: float = ray.direction.dot(ray.direction)
-        half_b: float = oc.dot(ray.direction)
-        c: float = oc.dot(oc) - self._radius * self._radius
+        a: Number = ray.direction.dot(ray.direction)
+        half_b: Number = oc.dot(ray.direction)
+        c: Number = oc.dot(oc) - self._radius ** 2
 
-        discriminant: float = half_b * half_b - a * c
+        discriminant: Number = half_b * half_b - a * c
 
         if discriminant < 0:
             return math.inf, math.inf
+        else:
+            sqrt_disc: float = math.sqrt(discriminant)
+            t1: float = (-half_b - sqrt_disc) / a
+            t2: float = (-half_b + sqrt_disc) / a
 
-        sqrt_disc: float = math.sqrt(discriminant)
-        t1: float = (-half_b - sqrt_disc) / a
-        t2: float = (-half_b + sqrt_disc) / a
-
-        return t1, t2
+            return t1, t2
 
     def __repr__(self) -> str:
         """
