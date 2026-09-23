@@ -2,18 +2,16 @@ from dataclasses import dataclass
 
 from Canvas import Canvas
 from Point3 import Point3
-from Vec3 import Vec3
 from Viewport import Viewport
 
 
 @dataclass
 class Camera:
     """
-    相机：提供视线起点（origin）与相机局部朝向（direction）。
+    相机：提供视线起点（origin）。
     """
 
     origin: Point3 = Point3(0, 0, 0)
-    direction: Vec3 = Vec3(0, 0, 1)
 
     @staticmethod
     def canvasToViewport(
