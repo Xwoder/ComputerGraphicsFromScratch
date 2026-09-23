@@ -90,9 +90,9 @@ class Sphere:
         if discriminant < 0:
             return math.inf, math.inf
         else:
-            sqrt_disc: float = math.sqrt(discriminant)
-            t1: float = (-half_b - sqrt_disc) / a
-            t2: float = (-half_b + sqrt_disc) / a
+            sqrt_disc: Number = math.sqrt(discriminant)
+            t1: Number = (-half_b - sqrt_disc) / a
+            t2: Number = (-half_b + sqrt_disc) / a
 
             return t1, t2
 
