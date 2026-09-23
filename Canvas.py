@@ -25,11 +25,6 @@ class Canvas:
                  color: Color) -> None:
         self._pixels[y][x] = color
 
-    def getPixel(self,
-                 x: int,
-                 y: int) -> Color:
-        return self._pixels[y][x]
-
     @property
     def width(self) -> int:
         return self._width
