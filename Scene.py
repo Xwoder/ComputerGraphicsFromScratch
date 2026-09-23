@@ -9,3 +9,7 @@ class Scene:
 
     def add(self, s:Sphere):
         self._spheres.append(s)
+
+    @property
+    def spheres(self):
+        return self._spheres
