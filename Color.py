@@ -17,6 +17,9 @@ class Color:
         self._green = green
         self._blue = blue
 
+    def __repr__(self) -> str:
+        return f"Color({self._red}, {self._green}, {self._blue})"
+
 
 Color.Black = Color(0, 0, 0)
 Color.White = Color(255, 255, 255)
