@@ -1,6 +1,7 @@
 from Camera import Camera
 from Canvas import Canvas
 from Color import Color
+from Point3 import Point3
 from Ray import Ray
 from RayTracer import RayTracer
 from Scene import Scene
@@ -40,14 +41,14 @@ class Renderer:
         canvas = self._canvas
         for y in range(canvas.height):
             for x in range(canvas.width):
-                target = Camera.canvasToViewport(
+                target: Point3 = Camera.canvasToViewport(
                     canvas,
                     self._viewport,
                     x,
                     y,
                 )
 
-                ray = Ray(
+                ray: Ray = Ray(
                     self._camera.origin,
                     target - self._camera.origin,
                 )
