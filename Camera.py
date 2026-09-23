@@ -1,34 +1,19 @@
+from dataclasses import dataclass
+
 from Canvas import Canvas
 from Point3 import Point3
 from Vec3 import Vec3
 from Viewport import Viewport
 
 
+@dataclass
 class Camera:
-    _origin: Point3 = Point3(0, 0, 0)
-    _direction: Vec3 = Vec3(0, 0, 1)
+    """
+    相机：提供视线起点（origin）与相机局部朝向（direction）。
+    """
 
-    @property
-    def origin(self) -> Point3:
-        """
-        相机位置（即所有视线的起点，只读属性）。
-
-        Returns:
-            Point3: 相机所在的三维点
-        """
-        return self._origin
-
-    def __repr__(self) -> str:
-        """
-        返回相机的官方字符串表示，形如 Camera(center=..., direction=...)。
-        供 repr()、交互式解释器及调试使用。
-
-        Returns:
-            str: 包含相机位置与朝向的字符串表示
-        """
-        return (f"Camera("
-                f"center={self._origin!r}, "
-                f"direction={self._direction!r})")
+    origin: Point3 = Point3(0, 0, 0)
+    direction: Vec3 = Vec3(0, 0, 1)
 
     @staticmethod
     def canvasToViewport(
