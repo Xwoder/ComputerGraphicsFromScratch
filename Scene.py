@@ -1,18 +1,18 @@
-from Color import Color
+from dataclasses import dataclass
+from typing import ClassVar
+
+from Color import BLACK, Color
 from Sphere import Sphere
 
 
+@dataclass
 class Scene:
-    BACKGROUND_COLOR: Color = Color.Black
+    """
+    场景：包含一组球体，以及未命中任何球体时的背景色。
+    """
 
-    _spheres: list[Sphere]
+    spheres: list[Sphere]
+    BACKGROUND_COLOR: ClassVar[Color] = BLACK
 
-    def __init__(self, spheres: list[Sphere]):
-        self._spheres = spheres
-
-    def add(self, s: Sphere):
-        self._spheres.append(s)
-
-    @property
-    def spheres(self):
-        return self._spheres
+    def add(self, s: Sphere) -> None:
+        self.spheres.append(s)
