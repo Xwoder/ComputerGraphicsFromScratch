@@ -14,6 +14,12 @@ from Vec3 import Vec3
 # 着色点自交规避偏移：反射/阴影射线起点沿方向偏移该值，避免命中着色点自身。
 SHADOW_EPSILON: Number = 0.001
 
+# 阴影检测区间下界固定为 SHADOW_EPSILON，上界由光源类型决定（点光源 1、
+# 平行光 ∞），整次渲染中不变。预定义并复用，避免 compute_lighting 热路径
+# （每像素 × 每光源）反复构造 Interval 对象。
+_SHADOW_INTERVAL_POINT = Interval(SHADOW_EPSILON, 1)
+_SHADOW_INTERVAL_DIR = Interval(SHADOW_EPSILON, math.inf)
+
 
 class RayTracer:
     _scene: Scene
@@ -129,14 +135,15 @@ class RayTracer:
                 intensity += light.intensity
                 continue
 
-            # 计算指向光源的方向 L，以及阴影检测范围
+            # 计算指向光源的方向 L，并选定对应的阴影检测区间（见模块级常量，
+            # 区间内已含 SHADOW_EPSILON 偏移，整次渲染复用，避免热路径重复构造）。
             if isinstance(light, PointLight):
                 L = light.position - point
-                t_max: Number = 1
+                shadow_interval = _SHADOW_INTERVAL_POINT
 
             elif isinstance(light, DirectionalLight):
                 L = light.direction
-                t_max = math.inf
+                shadow_interval = _SHADOW_INTERVAL_DIR
 
             else:
                 continue
@@ -148,7 +155,7 @@ class RayTracer:
             # 阴影检测
             shadow_sphere, _ = self._scene.closestIntersection(
                 Ray(point, L),
-                Interval(SHADOW_EPSILON, t_max),
+                shadow_interval,
             )
 
             if shadow_sphere is not None:
