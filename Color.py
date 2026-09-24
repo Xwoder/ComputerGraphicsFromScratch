@@ -21,9 +21,9 @@ class Color:
         """
 
         return Color(
-            min(int(self.red * number), 255),
-            min(int(self.green * number), 255),
-            min(int(self.blue * number), 255),
+            max(0, min(int(self.red * number), 255)),
+            max(0, min(int(self.green * number), 255)),
+            max(0, min(int(self.blue * number), 255)),
         )
 
     def __add__(self, other: Color) -> Color:
