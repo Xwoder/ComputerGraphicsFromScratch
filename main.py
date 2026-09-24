@@ -1,14 +1,14 @@
 from pathlib import Path
 
-from AmbientLight import AmbientLight
+from Light.AmbientLight import AmbientLight
 from Camera import Camera
 from Canvas import Canvas
 from Color import Color
-from DirectionalLight import DirectionalLight
+from Light.DirectionalLight import DirectionalLight
 from Light import Light
 from Number import Number
 from Point3 import Point3
-from PointLight import PointLight
+from Light.PointLight import PointLight
 from Renderer import Renderer
 from Scene import Scene
 from Sphere import Sphere
