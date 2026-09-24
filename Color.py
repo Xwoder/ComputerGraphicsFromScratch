@@ -26,6 +26,17 @@ class Color:
             min(int(self.blue * number), 255),
         )
 
+    def __add__(self, other: Color) -> Color:
+        """
+        颜色相加（用于叠加反射色与本地色），各分量同样截断到 0~255。
+        """
+
+        return Color(
+            min(self.red + other.red, 255),
+            min(self.green + other.green, 255),
+            min(self.blue + other.blue, 255),
+        )
+
 
 BLACK: Color = Color(0, 0, 0)
 WHITE: Color = Color(255, 255, 255)
