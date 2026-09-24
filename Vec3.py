@@ -119,5 +119,11 @@ class Vec3:
         """
         return self.x * other.x + self.y * other.y + self.z * other.z
 
-    def normalize(self) -> Vec3:
-        return self / self.length()
+
+    def normalize(self) -> "Vec3":
+        length: Number = self.length()
+
+        if length == 0:
+            raise ValueError("Cannot normalize a zero vector.")
+
+        return self / length
