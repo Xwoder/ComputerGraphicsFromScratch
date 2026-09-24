@@ -43,9 +43,9 @@ class Sphere:
         """
 
         oc = ray.origin - self.center
-        a: Number = ray.direction.dot(ray.direction)
-        half_b: Number = oc.dot(ray.direction)
-        c: Number = oc.dot(oc) - self.radius ** 2
+        a: Number = ray.direction @ ray.direction
+        half_b: Number = oc @ ray.direction
+        c: Number = oc @ oc - self.radius ** 2
 
         discriminant: Number = half_b * half_b - a * c
 
