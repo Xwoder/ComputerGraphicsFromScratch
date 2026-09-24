@@ -1,13 +1,18 @@
 from pathlib import Path
 
+from AmbientLight import AmbientLight
 from Camera import Camera
 from Canvas import Canvas
 from Color import Color
+from DirectionalLight import DirectionalLight
+from Light import Light
 from Number import Number
 from Point3 import Point3
+from PointLight import PointLight
 from Renderer import Renderer
 from Scene import Scene
 from Sphere import Sphere
+from Vec3 import Vec3
 from Viewport import Viewport
 
 if __name__ == '__main__':
@@ -34,7 +39,12 @@ if __name__ == '__main__':
         Sphere(center=Point3(-2, 0, 4), radius=1, color=Color(0, 255, 0)),
         Sphere(center=Point3(0, -5001, 0), radius=5000, color=Color(255, 255, 0)),
     ]
-    scene: Scene = Scene(spheres)
+    lights: list[Light] = [
+        AmbientLight(0.2),
+        PointLight(0.6, Point3(2, 1, 0)),
+        DirectionalLight(0.6, Vec3(1, 4, 4)),
+    ]
+    scene: Scene = Scene(spheres=spheres, lights=lights)
 
     renderer: Renderer = Renderer(scene, canvas, camera, viewport)
     renderer.render()
