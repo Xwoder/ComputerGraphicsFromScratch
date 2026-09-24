@@ -8,6 +8,7 @@ from Number import Number
 from Point3 import Point3
 from Ray import Ray
 from Scene import Scene
+from Sphere import Sphere
 from Vec3 import Vec3
 
 
@@ -18,8 +19,8 @@ class RayTracer:
         self._scene = scene
 
     def traceRay(self, ray: Ray) -> Color:
-        closest_t = math.inf
-        closest_sphere = None
+        closest_t: Number = math.inf
+        closest_sphere: Sphere | None = None
 
         for sphere in self._scene.spheres:
             for t in sphere.intersect(ray):
