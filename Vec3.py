@@ -118,3 +118,6 @@ class Vec3:
         对应 C++ 的 dot(const vec3&, const vec3&)。
         """
         return self.x * other.x + self.y * other.y + self.z * other.z
+
+    def normalize(self) -> Vec3:
+        return self / self.length()
