@@ -32,6 +32,7 @@ if __name__ == '__main__':
         Sphere(center=Point3(0, -1, 3), radius=1, color=Color(255, 0, 0)),
         Sphere(center=Point3(2, 0, 4), radius=1, color=Color(0, 0, 255)),
         Sphere(center=Point3(-2, 0, 4), radius=1, color=Color(0, 255, 0)),
+        Sphere(center=Point3(0, -5001, 0), radius=5000, color=Color(255, 255, 0)),
     ]
     scene: Scene = Scene(spheres)
 
