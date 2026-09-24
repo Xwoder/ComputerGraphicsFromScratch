@@ -1,8 +1,8 @@
 import math
 
-from Light.AmbientLight import AmbientLight
 from Color import Color
 from Interval import Interval
+from Light.AmbientLight import AmbientLight
 from Light.Light import Light
 from Number import Number
 from Point3 import Point3
@@ -32,15 +32,43 @@ class RayTracer:
         else:
             point: Point3 = ray.at(closest_t)
             N: Vec3 = (point - closest_sphere.center).normalize()
-            color: Color = closest_sphere.color * self.compute_lighting(point, N, self._scene.lights)
+            # 视线方向 V：由着色点指回相机，即射线方向的反向。
+            V: Vec3 = -ray.direction
+            color: Color = closest_sphere.color * self.compute_lighting(
+                point,
+                N,
+                V,
+                closest_sphere.specular,
+                self._scene.lights
+            )
             return color
 
     @staticmethod
     def compute_lighting(
-            p: Point3,
+            point: Point3,
             N: Vec3,
+            V: Vec3,
+            specular: Number,
             lights: list[Light],
     ) -> Number:
+        """
+        计算着色点 p 上的总光照强度（漫反射 + 镜面高光）。
+
+        漫反射：intensity * (N·L)，L 为指向光源的单位向量。
+        镜面高光（Phong）：R = 2 * N * (N·L) - L 为理想反射方向，
+        强度取 intensity * (R·V / (|R| * |V|)) ** specular，即 cos(alpha) 的
+        specular 次方；指数越大高光越锐利，specular <= 0 表示无高光。
+
+        Args:
+            point (Point3): 着色点。
+            N (Vec3): 该点处已归一化的法向量。
+            V (Vec3): 由着色点指向相机的视线方向（无需归一化）。
+            specular (Number): 高光指数，<= 0 时不做高光计算。
+            lights (list[Light]): 场景中的光源列表。
+
+        Returns:
+            Number: 总光照强度，用于乘以物体自身颜色。
+        """
 
         # N 由调用方保证已归一化（traceRay），分母中的 |N| 恒为 1，无需再除。
         # 每个光源只需把光方向归一化一次，即可直接用点积得到 cos(theta)。
@@ -52,7 +80,7 @@ class RayTracer:
                 intensity += light.intensity
                 continue
             else:
-                direction: Vec3 = light.get_direction(p)
+                direction: Vec3 = light.get_direction(point)
 
                 # 退化情形：点光源恰好落在着色点上，方向为零向量，无法归一化
                 if direction.length_squared() == 0:
@@ -60,9 +88,17 @@ class RayTracer:
 
                 L: Vec3 = direction.normalize()
 
-                n_dot_l: Number = N.dot(L)
+                l_dot_n: Number = L.dot(N)
 
-                if n_dot_l > 0:
-                    intensity += light.intensity * n_dot_l
+                if l_dot_n > 0:
+                    intensity += light.intensity * l_dot_n
+
+                # 高光项独立于漫反射项：只要反射方向偏向视线就贡献亮度。
+                if specular > 0:
+                    R: Vec3 = (2 * N * l_dot_n - L).normalize()
+                    r_dot_v: Number = R.dot(V.normalize())
+
+                    if r_dot_v > 0:
+                        intensity += light.intensity * r_dot_v ** specular
 
         return intensity
