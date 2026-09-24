@@ -35,15 +35,15 @@ class Scene:
             tuple[Sphere | None, Number]: (最近命中的球体, 对应的 t)；未命中时为 (None, inf)。
         """
 
-        closest_t: Number = math.inf
-        closest_sphere: Sphere | None = None
+        closest_t: Number = math.inf  # 当前最近命中距离，初始化为正无穷表示尚未命中
+        closest_sphere: Sphere | None = None  # 最近命中的球体，初始化为 None 表示未命中
 
-        for sphere in self.spheres:
-            t1, t2 = sphere.intersect(ray)
+        for sphere in self.spheres:  # 遍历场景中的每一个球体
+            t1, t2 = sphere.intersect(ray)  # 求射线与该球体的两个解析交点参数 t
 
-            for t in (t1, t2):
-                if t in interval and t < closest_t:
-                    closest_t = t
-                    closest_sphere = sphere
+            for t in (t1, t2):  # 依次检查两个根
+                if t in interval and t < closest_t:  # 根必须在有效区间内，且比当前最近距离更近
+                    closest_t = t  # 更新最近命中距离
+                    closest_sphere = sphere  # 记录对应的球体
 
-        return closest_sphere, closest_t
+        return closest_sphere, closest_t  # 返回最近命中的球体与 t；未命中时为 (None, inf)
