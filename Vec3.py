@@ -112,6 +112,23 @@ class Vec3:
         """
         return self.x * other.x + self.y * other.y + self.z * other.z
 
+    def __matmul__(self, other: Vec3) -> Number:
+        """
+        矩阵乘法运算符（v @ u），此处定义为向量内积（点积），返回标量。
+
+        与 numpy 一维数组的 @ 语义一致，便于把 N.dot(L) 写成 N @ L
+        这类投影式。other 必须是 Vec3。
+        """
+        if not isinstance(other, Vec3):
+            return NotImplemented
+        return self.dot(other)
+
+    def __rmatmul__(self, other: Vec3) -> Number:
+        """
+        右乘（u @ v）。点积满足交换律，直接复用 __matmul__。
+        """
+        return self.__matmul__(other)
+
 
     def normalize(self) -> "Vec3":
         length: Number = self.length()
