@@ -8,7 +8,6 @@ from Number import Number
 from Point3 import Point3
 from Ray import Ray
 from Scene import Scene
-from Sphere import Sphere
 from Vec3 import Vec3
 
 
@@ -19,30 +18,42 @@ class RayTracer:
         self._scene = scene
 
     def traceRay(self, ray: Ray) -> Color:
-        closest_t: Number = math.inf
-        closest_sphere: Sphere | None = None
+        """
+        追踪一条射线，返回它"看到的"颜色。
 
-        for sphere in self._scene.spheres:
-            for t in sphere.intersect(ray):
-                if t in Interval(1, math.inf) and t < closest_t:
-                    closest_t = t
-                    closest_sphere = sphere
+        流程与参考实现保持一致：
+        1. 调用 `Scene.closestIntersection` 取最近命中；
+        2. 未命中则返回场景背景色；
+        3. 命中则求交点 P、法向 N，交给 `compute_lighting` 算光照强度，
+           再乘以物体自身颜色。
+
+        Args:
+            ray (Ray): 由相机（或反射点）出发的射线。
+
+        Returns:
+            Color: 该方向上的最终颜色。
+        """
+
+        closest_sphere, closest_t = self._scene.closestIntersection(
+            ray,
+            Interval(1, math.inf),
+        )
 
         if closest_sphere is None:
             return self._scene.BACKGROUND_COLOR
-        else:
-            point: Point3 = ray.at(closest_t)
-            N: Vec3 = (point - closest_sphere.center).normalize()
-            # 视线方向 V：由着色点指回相机，即射线方向的反向。
-            V: Vec3 = -ray.direction
-            color: Color = closest_sphere.color * self.compute_lighting(
-                point,
-                N,
-                V,
-                closest_sphere.specular,
-                self._scene.lights
-            )
-            return color
+
+        point: Point3 = ray.at(closest_t)
+        N: Vec3 = (point - closest_sphere.center).normalize()
+        # 视线方向 V：由着色点指回相机，即射线方向的反向。
+        V: Vec3 = -ray.direction
+
+        return closest_sphere.color * self.compute_lighting(
+            point,
+            N,
+            V,
+            closest_sphere.specular,
+            self._scene.lights
+        )
 
     @staticmethod
     def compute_lighting(
