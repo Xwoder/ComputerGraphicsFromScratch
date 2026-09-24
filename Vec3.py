@@ -130,7 +130,7 @@ class Vec3:
         return self.__matmul__(other)
 
 
-    def normalize(self) -> "Vec3":
+    def normalize(self) -> Vec3:
         length: Number = self.length()
 
         if length == 0:
