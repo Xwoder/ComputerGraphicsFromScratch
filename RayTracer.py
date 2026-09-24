@@ -3,7 +3,8 @@ import math
 from Color import Color
 from Interval import Interval
 from Light.AmbientLight import AmbientLight
-from Light.Light import Light
+from Light.DirectionalLight import DirectionalLight
+from Light.PointLight import PointLight
 from Number import Number
 from Point3 import Point3
 from Ray import Ray
@@ -52,65 +53,90 @@ class RayTracer:
             N,
             V,
             closest_sphere.specular,
-            self._scene.lights
         )
 
-    @staticmethod
     def compute_lighting(
+            self,
             point: Point3,
             N: Vec3,
             V: Vec3,
             specular: Number,
-            lights: list[Light],
     ) -> Number:
         """
-        计算着色点 p 上的总光照强度（漫反射 + 镜面高光）。
+        计算着色点 p 上的总光照强度（环境光 + 漫反射 + 镜面高光，含阴影）。
 
-        漫反射：intensity * (N·L)，L 为指向光源的单位向量。
-        镜面高光（Phong）：R = 2 * N * (N·L) - L 为理想反射方向，
-        强度取 intensity * (R·V / (|R| * |V|)) ** specular，即 cos(alpha) 的
-        specular 次方；指数越大高光越锐利，specular <= 0 表示无高光。
+        对照参考实现的 ComputeLighting(P, N, V, s)：
+        - 环境光直接累加 intensity；
+        - 点光源 L = position - P、t_max = 1，平行光 L = direction、t_max = ∞；
+        - 先沿 L 做一次阴影检测（ClosestIntersection，从 0.001 起以免自交），
+          被遮挡则该光源贡献置零（continue）；
+        - 漫反射：intensity * (N·L)，L 为指向光源的单位向量；
+        - 镜面高光（Phong）：R = 2 * N * (N·L) - L 为理想反射方向，
+          强度取 intensity * (R·V / (|R| * |V|)) ** specular；specular <= 0 时不算高光。
+        N 由调用方保证已归一化，故分母 |N| 恒为 1。
 
         Args:
             point (Point3): 着色点。
             N (Vec3): 该点处已归一化的法向量。
             V (Vec3): 由着色点指向相机的视线方向（无需归一化）。
             specular (Number): 高光指数，<= 0 时不做高光计算。
-            lights (list[Light]): 场景中的光源列表。
 
         Returns:
             Number: 总光照强度，用于乘以物体自身颜色。
         """
-
-        # N 由调用方保证已归一化（traceRay），分母中的 |N| 恒为 1，无需再除。
-        # 每个光源只需把光方向归一化一次，即可直接用点积得到 cos(theta)。
         intensity = 0.0
 
-        for light in lights:
+        # V 由调用方保证不是零向量
+        V = V.normalize()
 
+        for light in self._scene.lights:
+
+            # 环境光
             if isinstance(light, AmbientLight):
                 intensity += light.intensity
                 continue
+
+            # 计算指向光源的方向 L，以及阴影检测范围
+            if isinstance(light, PointLight):
+                L = light.position - point
+                t_max: Number = 1
+
+            elif isinstance(light, DirectionalLight):
+                L = light.direction
+                t_max = math.inf
+
             else:
-                direction: Vec3 = light.get_direction(point)
+                continue
 
-                # 退化情形：点光源恰好落在着色点上，方向为零向量，无法归一化
-                if direction.length_squared() == 0:
-                    continue
+            # 光源恰好位于着色点，无法确定光照方向
+            if L.length_squared() == 0:
+                continue
 
-                L: Vec3 = direction.normalize()
+            # 阴影检测
+            shadow_sphere, _ = self._scene.closestIntersection(
+                Ray(point, L),
+                Interval(0.001, t_max),
+            )
 
-                l_dot_n: Number = L.dot(N)
+            if shadow_sphere is not None:
+                continue
 
-                if l_dot_n > 0:
-                    intensity += light.intensity * l_dot_n
+            # 单位化光照方向
+            L = L.normalize()
 
-                # 高光项独立于漫反射项：只要反射方向偏向视线就贡献亮度。
-                if specular > 0:
-                    R: Vec3 = (2 * N * l_dot_n - L).normalize()
-                    r_dot_v: Number = R.dot(V.normalize())
+            # N · L
+            n_dot_l = N @ L
 
-                    if r_dot_v > 0:
-                        intensity += light.intensity * r_dot_v ** specular
+            # 漫反射
+            if n_dot_l > 0:
+                intensity += light.intensity * n_dot_l
+
+            # 镜面高光
+            if specular > 0:
+                R = 2 * N * n_dot_l - L
+                r_dot_v = R @ V
+
+                if r_dot_v > 0:
+                    intensity += light.intensity * r_dot_v ** specular
 
         return intensity
