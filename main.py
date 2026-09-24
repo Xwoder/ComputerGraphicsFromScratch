@@ -11,15 +11,20 @@ from Sphere import Sphere
 from Viewport import Viewport
 
 if __name__ == '__main__':
+    from fractions import Fraction
+
+    ASPECT_RATIO: Fraction = Fraction(4, 3)
+
     CANVAS_WIDTH: int = 800
-    CANVAS_HEIGHT: int = 600
+    CANVAS_HEIGHT: int = int(CANVAS_WIDTH / ASPECT_RATIO)
     canvas: Canvas = Canvas(CANVAS_WIDTH, CANVAS_HEIGHT)
     # 视口宽高比与画布保持一致（800:600 = 4:3），避免图像被拉伸。
     # 视口宽度取 1（世界单位）：过宽会让视野(FOV)过大，导致球体显得过小而完整落在画面内；
     # 取 1 时三个球会因超出画面边界而被裁切，符合预期。
     viewportWidth: Number = 1
+    viewportHeight: Number = viewportWidth / ASPECT_RATIO
     viewport: Viewport = Viewport(width=viewportWidth,
-                                  height=viewportWidth * CANVAS_HEIGHT / CANVAS_WIDTH,
+                                  height=viewportHeight,
                                   distance=1.0)
     camera: Camera = Camera()
 
