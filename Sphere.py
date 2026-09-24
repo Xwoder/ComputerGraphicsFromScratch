@@ -11,12 +11,13 @@ from Ray import Ray
 @dataclass(frozen=True)
 class Sphere:
     """
-    球体：由球心、半径与表面颜色定义。
+    球体：由球心、半径、表面颜色与高光指数定义。
     """
 
     center: Point3
     radius: Number
     color: Color = WHITE
+    specular: Number = 0
 
     def intersect(self, ray: Ray) -> tuple[float, float]:
         """
