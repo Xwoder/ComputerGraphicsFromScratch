@@ -45,14 +45,15 @@ class Canvas:
             path (Path): 输出文件路径，例如 Path("output.ppm")。
         """
 
-        lines: list[str] = ["P3", f"{self._width} {self._height}", "255"]
-
-        for y in range(self._height):
-            row = []
-            for x in range(self._width):
-                color = self._pixels[y][x]
-                row.append(f"{color.red} {color.green} {color.blue}")
-            lines.append(" ".join(row))
-
+        # 逐行构造并写入：每行像素拼成单个字符串后立即写出，不缓存整图，
+        # 把峰值内存从「整张图的大字符串」降到「单行」，对 480k 像素更友好。
         with open(path, "w", encoding="ascii") as f:
-            f.write("\n".join(lines) + "\n")
+            f.write("P3\n")
+            f.write(f"{self._width} {self._height}\n")
+            f.write("255\n")
+            for y in range(self._height):
+                row = []
+                for x in range(self._width):
+                    color = self._pixels[y][x]
+                    row.append(f"{color.red} {color.green} {color.blue}")
+                f.write(" ".join(row) + "\n")
