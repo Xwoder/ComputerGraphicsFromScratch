@@ -1,8 +1,9 @@
 import math
 
+from AmbientLight import AmbientLight
 from Color import Color
 from Interval import Interval
-from Lighting import Lighting
+from Light import Light
 from Number import Number
 from Point3 import Point3
 from Ray import Ray
@@ -31,5 +32,33 @@ class RayTracer:
         else:
             point: Point3 = ray.at(closest_t)
             N: Vec3 = (point - closest_sphere.center).normalize()
-            color: Color = closest_sphere.color * Lighting.compute_lighting(point, N,self._scene.lights)
+            color: Color = closest_sphere.color * self.compute_lighting(point, N, self._scene.lights)
             return color
+
+    @staticmethod
+    def compute_lighting(
+            p: Point3,
+            N: Vec3,
+            lights: list[Light],
+    ) -> Number:
+
+        intensity = 0.0
+
+        for light in lights:
+
+            if isinstance(light, AmbientLight):
+                intensity += light.intensity
+                continue
+            else:
+                direction: Vec3 = light.get_direction(p)
+
+                n_dot_l: Number = N @ direction
+
+                if n_dot_l > 0:
+                    intensity += (
+                            light.intensity
+                            * n_dot_l
+                            / (N.length() * direction.length())
+                    )
+
+        return intensity
