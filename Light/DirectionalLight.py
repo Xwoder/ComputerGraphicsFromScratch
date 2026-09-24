@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import override
 
-from Light import Light
+from Light.Light import Light
 from Point3 import Point3
 from Vec3 import Vec3
 

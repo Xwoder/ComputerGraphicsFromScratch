@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 
 from Color import Color, WHITE
-from Light import Light
+from Light.Light import Light
 from Sphere import Sphere
 
 

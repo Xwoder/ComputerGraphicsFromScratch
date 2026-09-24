@@ -5,7 +5,7 @@ from Camera import Camera
 from Canvas import Canvas
 from Color import Color
 from Light.DirectionalLight import DirectionalLight
-from Light import Light
+from Light.Light import Light
 from Number import Number
 from Point3 import Point3
 from Light.PointLight import PointLight
@@ -27,7 +27,7 @@ if __name__ == '__main__':
     # 视口宽度取 1（世界单位）：过宽会让视野(FOV)过大，导致球体显得过小而完整落在画面内；
     # 取 1 时三个球会因超出画面边界而被裁切，符合预期。
     viewportWidth: Number = 1
-    viewportHeight: Number = viewportWidth / ASPECT_RATIO
+    viewportHeight: Number = float(viewportWidth / ASPECT_RATIO)
     viewport: Viewport = Viewport(width=viewportWidth,
                                   height=viewportHeight,
                                   distance=1.0)

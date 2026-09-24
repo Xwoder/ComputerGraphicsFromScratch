@@ -3,7 +3,7 @@ import math
 from Light.AmbientLight import AmbientLight
 from Color import Color
 from Interval import Interval
-from Light import Light
+from Light.Light import Light
 from Number import Number
 from Point3 import Point3
 from Ray import Ray
