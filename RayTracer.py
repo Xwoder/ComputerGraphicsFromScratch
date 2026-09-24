@@ -42,6 +42,8 @@ class RayTracer:
             lights: list[Light],
     ) -> Number:
 
+        # N 由调用方保证已归一化（traceRay），分母中的 |N| 恒为 1，无需再除。
+        # 每个光源只需把光方向归一化一次，即可直接用点积得到 cos(theta)。
         intensity = 0.0
 
         for light in lights:
@@ -52,13 +54,15 @@ class RayTracer:
             else:
                 direction: Vec3 = light.get_direction(p)
 
-                n_dot_l: Number = N @ direction
+                # 退化情形：点光源恰好落在着色点上，方向为零向量，无法归一化
+                if direction.length_squared() == 0:
+                    continue
+
+                L: Vec3 = direction.normalize()
+
+                n_dot_l: Number = N.dot(L)
 
                 if n_dot_l > 0:
-                    intensity += (
-                            light.intensity
-                            * n_dot_l
-                            / (N.length() * direction.length())
-                    )
+                    intensity += light.intensity * n_dot_l
 
         return intensity
