@@ -75,6 +75,13 @@ class Vec3:
             return Vec3(self.x / other.x, self.y / other.y, self.z / other.z)
         return Vec3(self.x / other, self.y / other, self.z / other)
 
+    def __matmul__(self, other: Vec3) -> Number:
+        return (
+                self.x * other.x
+                + self.y * other.y
+                + self.z * other.z
+        )
+
     def __eq__(self, other: object) -> bool:
         """
         相等判断（v == u），当三个分量都相等时返回 True。
