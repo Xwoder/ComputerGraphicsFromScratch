@@ -11,6 +11,9 @@ from Ray import Ray
 from Scene import Scene
 from Vec3 import Vec3
 
+# 着色点自交规避偏移：反射/阴影射线起点沿方向偏移该值，避免命中着色点自身。
+SHADOW_EPSILON: Number = 0.001
+
 
 class RayTracer:
     _scene: Scene
@@ -43,7 +46,7 @@ class RayTracer:
             ray (Ray): 由相机（或反射点）出发的射线。
             recursion_depth (int): 剩余递归层数，默认 3。
             t_min (Number): 最近交点的有效下界；主射线取 1，
-                反射射线取 0.001 以避开着色点自身的自交。
+                反射射线取 SHADOW_EPSILON 以避开着色点自身的自交。
 
         Returns:
             Color: 该方向上的最终颜色。
@@ -79,7 +82,7 @@ class RayTracer:
         R: Vec3 = (2 * N * (N @ V) - V).normalize()
         reflected_color: Color = self.traceRay(
             Ray(point, R),
-            t_min=0.001,
+            t_min=SHADOW_EPSILON,
             recursion_depth=recursion_depth - 1,
         )
 
@@ -98,7 +101,7 @@ class RayTracer:
         对照参考实现的 ComputeLighting(P, N, V, s)：
         - 环境光直接累加 intensity；
         - 点光源 L = position - P、t_max = 1，平行光 L = direction、t_max = ∞；
-        - 先沿 L 做一次阴影检测（ClosestIntersection，从 0.001 起以免自交），
+        - 先沿 L 做一次阴影检测（ClosestIntersection，从 SHADOW_EPSILON 起以免自交），
           被遮挡则该光源贡献置零（continue）；
         - 漫反射：intensity * (N·L)，L 为指向光源的单位向量；
         - 镜面高光（Phong）：R = 2 * N * (N·L) - L 为理想反射方向，
@@ -145,7 +148,7 @@ class RayTracer:
             # 阴影检测
             shadow_sphere, _ = self._scene.closestIntersection(
                 Ray(point, L),
-                Interval(0.001, t_max),
+                Interval(SHADOW_EPSILON, t_max),
             )
 
             if shadow_sphere is not None:
