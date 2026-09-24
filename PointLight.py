@@ -1,8 +1,10 @@
+from dataclasses import dataclass
+
 from Light import Light
 from Point3 import Point3
 from Vec3 import Vec3
 
-
+@dataclass
 class PointLight(Light):
     position: Point3
 
