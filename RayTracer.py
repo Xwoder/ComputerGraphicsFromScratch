@@ -15,21 +15,35 @@ from Vec3 import Vec3
 class RayTracer:
     _scene: Scene
 
+    # 反射递归次数上限：达到上限或物体不反射时停止递归。
+    MAX_RECURSION_DEPTH: int = 3
+
     def __init__(self, scene: Scene):
         self._scene = scene
 
-    def traceRay(self, ray: Ray) -> Color:
+    def traceRay(
+            self,
+            ray: Ray,
+            t_min: Number = 1,
+            recursion_depth: int = MAX_RECURSION_DEPTH,
+    ) -> Color:
         """
-        追踪一条射线，返回它"看到的"颜色。
+        追踪一条射线，返回它"看到的"颜色（含阴影与递归反射）。
 
-        流程与参考实现保持一致：
-        1. 调用 `Scene.closestIntersection` 取最近命中；
+        流程与参考实现 TraceRay(O, D, t_min, t_max, recursion_depth) 对齐：
+        1. 调用 `Scene.closestIntersection` 取最近命中（区间 [t_min, ∞)）；
         2. 未命中则返回场景背景色；
         3. 命中则求交点 P、法向 N，交给 `compute_lighting` 算光照强度，
-           再乘以物体自身颜色。
+           得到本地色 local_color；
+        4. 若递归深度用尽或物体不反射，直接返回本地色；
+           否则沿反射方向递归求反射色，并与本地色按反射率 r 混合：
+           local_color * (1 - r) + reflected_color * r。
 
         Args:
             ray (Ray): 由相机（或反射点）出发的射线。
+            recursion_depth (int): 剩余递归层数，默认 3。
+            t_min (Number): 最近交点的有效下界；主射线取 1，
+                反射射线取 0.001 以避开着色点自身的自交。
 
         Returns:
             Color: 该方向上的最终颜色。
@@ -37,7 +51,7 @@ class RayTracer:
 
         closest_sphere, closest_t = self._scene.closestIntersection(
             ray,
-            Interval(1, math.inf),
+            Interval(t_min, math.inf),
         )
 
         if closest_sphere is None:
@@ -48,12 +62,28 @@ class RayTracer:
         # 视线方向 V：由着色点指回相机，即射线方向的反向。
         V: Vec3 = -ray.direction
 
-        return closest_sphere.color * self.compute_lighting(
+        local_color: Color = closest_sphere.color * self.compute_lighting(
             point,
             N,
             V,
             closest_sphere.specular,
         )
+
+        r: Number = closest_sphere.reflective
+
+        # 递归层数耗尽或物体不反射时，不再递归
+        if recursion_depth <= 0 or r <= 0:
+            return local_color
+
+        # 反射方向 R = 2*N*(N·V) - V，V = -D 为入射方向的反向
+        R: Vec3 = (2 * N * (N @ V) - V).normalize()
+        reflected_color: Color = self.traceRay(
+            Ray(point, R),
+            t_min=0.001,
+            recursion_depth=recursion_depth - 1,
+        )
+
+        return local_color * (1 - r) + reflected_color * r
 
     def compute_lighting(
             self,
