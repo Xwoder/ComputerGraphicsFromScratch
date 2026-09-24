@@ -14,10 +14,16 @@ class Color:
     blue: int
 
     def __mul__(self, number: Number) -> Color:
+        """
+        颜色按标量缩放（乘以光照强度）：各分量先乘后截断到 0~255。
+
+        镜面高光会让总强度超过 1，若不截断会写出非法的 PPM 分量值。
+        """
+
         return Color(
-            int(self.red * number),
-            int(self.green * number),
-            int(self.blue * number),
+            min(int(self.red * number), 255),
+            min(int(self.green * number), 255),
+            min(int(self.blue * number), 255),
         )
 
 
