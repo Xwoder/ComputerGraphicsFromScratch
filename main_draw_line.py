@@ -16,21 +16,10 @@ from matplotlib.ticker import MultipleLocator
 
 from matplotlib_tools import configure_chinese_font
 from Point2 import Point2
+from Canvas2D import Canvas2D
 
 # 配置支持中文的字体，避免标题/图例中的中文显示为方块。
 configure_chinese_font()
-
-
-def rasterize_line(k, intercept, x_start, x_end):
-    """栅格画法：x 每次递增 1，由 y = kx + b 得到浮点 y，
-    再四舍五入到最近的栅格行，每个 x 只点亮一个栅格单元 (x, round(y))。"""
-    cells = []
-    x = x_start
-    while x <= x_end:
-        y = k * x + intercept
-        cells.append((x, int(round(y))))  # 最邻近栅格化：每列只点亮一个单元
-        x += 1
-    return cells
 
 
 def main():
@@ -64,7 +53,7 @@ def main():
                 label=f"{name}")
 
         # 栅格画法：每列只点亮一个最近的栅格单元（仅保留落在 100×100 内的）
-        cells = rasterize_line(k, b, A.x, x_end)
+        cells = Canvas2D.rasterize_line(k, b, A.x, x_end)
         for x, y in cells:
             if 0 <= y < GRID:
                 ax.add_patch(plt.Rectangle((x, y), 1, 1,

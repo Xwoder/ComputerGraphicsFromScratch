@@ -24,58 +24,10 @@ from matplotlib.ticker import MultipleLocator
 
 from matplotlib_tools import configure_chinese_font
 from Point2 import Point2
+from Canvas2D import Canvas2D
 
 # 配置支持中文的字体，避免标题/图例中的中文显示为方块。
 configure_chinese_font()
-
-
-def interpolate(i0, d0, i1, d1):
-    """沿 i 从 i0 到 i1 每步 +1，线性插值出对应的 d，返回浮点列表。
-
-    返回长度 = |i1 - i0| + 1，列表第 k 个值对应 i = i0 + k。
-    当 i0 == i1 时退化为仅含 d0 的单元素列表。
-    """
-    if i0 == i1:
-        return [d0]
-    values = []
-    a = (d1 - d0) / (i1 - i0)  # 每步增量
-    d = d0
-    for i in range(i0, i1 + 1):
-        values.append(d)
-        d = d + a
-    return values
-
-
-def draw_line(p0: Point2, p1: Point2):
-    """对称直线栅格化：返回被点亮的栅格单元坐标列表 [(x, y), ...]。
-
-    算法依据 |Δx| 与 |Δy| 选取主轴：
-      - 偏水平：x 为主轴，对每个 x 插值出 y；
-      - 偏竖直：y 为主轴，对每个 y 插值出 x。
-    起点顺序始终保证主轴坐标递增，从而保证采样方向一致。
-    """
-    cells = []
-    # 栅格坐标必须为整数：端点先吸附到最近的栅格单元（round），
-    # 与数据轴 int(round(...)) 的语义保持一致；int() 会向零截断，
-    # 对 99.4/98.7 这类浮点端点会造成线段少画、落错格子。
-    x0, y0 = round(p0.x), round(p0.y)
-    x1, y1 = round(p1.x), round(p1.y)
-
-    if abs(x1 - x0) > abs(y1 - y0):
-        # 偏水平：确保 x 递增
-        if x0 > x1:
-            x0, y0, x1, y1 = x1, y1, x0, y0
-        ys = interpolate(x0, y0, x1, y1)
-        for x in range(x0, x1 + 1):
-            cells.append((x, int(round(ys[x - x0]))))
-    else:
-        # 偏竖直：确保 y 递增
-        if y0 > y1:
-            x0, y0, x1, y1 = x1, y1, x0, y0
-        xs = interpolate(y0, x0, y1, x1)
-        for y in range(y0, y1 + 1):
-            cells.append((int(round(xs[y - y0])), y))
-    return cells
 
 
 def main():
@@ -104,7 +56,7 @@ def main():
                 label=f"{name}")
 
         # 插值栅格化：沿主轴每步点亮一个最近的栅格单元（仅保留落在 100×100 内）
-        cells = draw_line(A, p1)
+        cells = Canvas2D.draw_line(A, p1)
         print(f"  {name}：点亮 {len(cells)} 个栅格单元")
         for x, y in cells:
             if 0 <= x < GRID and 0 <= y < GRID:
