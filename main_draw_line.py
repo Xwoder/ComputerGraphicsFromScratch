@@ -51,19 +51,20 @@ def draw_grid(draw: ImageDraw.ImageDraw,
 
 
 def main():
-    A = Point2D(0, 1)  # 三条直线的公共起始点 (0,1)
+    startPoint: Point2D = Point2D(0, 1)  # 三条直线的公共起始点 (0,1)
 
-    # 要绘制的多条直线：(终点 P1, 颜色, 图例名)
-    # 起点统一为 A=(0,1)，由 A 与 P1 反推斜率 k 与截距 b。
+    # 要绘制的多条直线：(起点 start, 终点 end, 颜色, 图例名)
+    # 每条线显式保存自己的 start 与 end。当前起点都取 startPoint=(0,1)（均过 (0,1)），
+    # 但结构上已允许后续各线段使用不同的起点，无需改动循环。
     # 颜色用 (R, G, B) 表示，对应原 Matplotlib 的 tab:red / tab:orange / tab:green。
     LINES = [
-        (Point2D(90, 46), (255, 45, 85), r"y = (1/2)x + 1"),
-        (Point2D(98, 99), (255, 153, 51), "y = x + 1"),
-        (Point2D(32, 97), (44, 170, 80), "y = 3x + 1"),
+        (startPoint, Point2D(90, 46), (255, 45, 85), r"y = (1/2)x + 1"),
+        (startPoint, Point2D(98, 99), (255, 153, 51), "y = x + 1"),
+        (startPoint, Point2D(32, 97), (44, 170, 80), "y = 3x + 1"),
     ]
 
     print("=" * 60)
-    print(f"起始点 A = {A}，各直线截距 b = 1（均过 (0,1)）")
+    print(f"起始点 startPoint = {startPoint}，各直线截距 b = 1（均过 (0,1)）")
     print("=" * 60)
 
     # 白色背景的 RGBA 画布
@@ -73,21 +74,21 @@ def main():
     # 先画 100×100 栅格（淡灰线）
     draw_grid(draw)
 
-    for p1, color, name in LINES:
-        # 由 A 与 p1 反推斜截式 y = kx + b
-        k = (p1.y - A.y) / (p1.x - A.x)
-        b = A.y - k * A.x
-        x_end = p1.x
+    for start, end, color, name in LINES:
+        # 由 start 与 end 反推斜截式 y = kx + b
+        k = (end.y - start.y) / (end.x - start.x)
+        b = start.y - k * start.x
+        x_start, x_end = start.x, end.x
 
         # 理想直线（淡色连续，作为栅格化的参考）
-        ax0, ay0 = point_to_image(A)
-        ax1, ay1 = point_to_image(p1)
+        ax0, ay0 = point_to_image(start)
+        ax1, ay1 = point_to_image(end)
         draw.line([(ax0, ay0), (ax1, ay1)],
                   fill=(color[0], color[1], color[2], int(0.4 * 255)),
                   width=2)
 
         # 栅格画法：每列只点亮一个最近的栅格单元（仅保留落在 100×100 内的）
-        cells = Canvas2D.rasterize_line(k, b, A.x, x_end)
+        cells = Canvas2D.rasterize_line(k, b, x_start, x_end)
         for c in cells:
             if 0 <= c.y < GRID:
                 rect = grid_to_image(int(c.x), int(c.y))
