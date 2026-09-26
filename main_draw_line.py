@@ -38,6 +38,18 @@ def point_to_image(p: Point2D) -> tuple[float, float]:
     return p.x * SCALE, (GRID - p.y) * SCALE
 
 
+def draw_grid(draw: ImageDraw.Draw,
+              color: tuple[int, int, int, int] = (211, 211, 211, 255)) -> None:
+    """在图像上画出 GRID×GRID 的栅格（淡灰线，每 SCALE 像素一条）。
+
+    draw：已绑定到目标图像的 ImageDraw 对象；color：栅格线 RGBA 颜色。
+    """
+    for i in range(GRID + 1):
+        pos = i * SCALE
+        draw.line([(pos, 0), (pos, H)], fill=color, width=1)  # 竖线
+        draw.line([(0, pos), (W, pos)], fill=color, width=1)  # 横线
+
+
 def main():
     A = Point2D(0, 1)  # 三条直线的公共起始点 (0,1)
 
@@ -57,6 +69,9 @@ def main():
     # 白色背景的 RGBA 画布
     img = Image.new("RGBA", (W, H), (255, 255, 255, 255))
     draw = ImageDraw.Draw(img, "RGBA")
+
+    # 先画 100×100 栅格（淡灰线）
+    draw_grid(draw)
 
     for p1, color, name in LINES:
         # 由 A 与 p1 反推斜截式 y = kx + b
