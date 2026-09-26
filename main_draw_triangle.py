@@ -40,9 +40,9 @@ def draw_wireframe_triangle(p0: Point2, p1: Point2, p2: Point2):
 def main():
     GRID = 100
     # 三角形的三个顶点（栅格坐标；整数或浮点均可，draw_line 内部会吸附到最近单元）
-    P0 = Point2(20, 20)
-    P1 = Point2(80, 25)
-    P2 = Point2(50, 85)
+    P0 = Point2(10, 10)
+    P1 = Point2(90, 40)
+    P2 = Point2(60, 90)
 
     cells = draw_wireframe_triangle(P0, P1, P2)
 
