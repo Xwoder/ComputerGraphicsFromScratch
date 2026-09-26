@@ -60,6 +60,6 @@ if __name__ == '__main__':
     renderer: Renderer = Renderer(scene, canvas, camera, viewport)
     renderer.render()
 
-    OUTPUT_PATH: Path = Path("output.ppm")
+    OUTPUT_PATH: Path = Path("graph_sphere.ppm")
     canvas.savePPM(OUTPUT_PATH)
     print(f"saved: {OUTPUT_PATH}")
