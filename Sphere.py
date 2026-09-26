@@ -1,6 +1,6 @@
 import math
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from Color import  Color
 from Number import Number
@@ -19,6 +19,11 @@ class Sphere:
     color: Color = Color.WHITE
     specular: Number = 0
     reflective: Number = 0
+    # 半径平方，构造时预计算，避免每次求交重复 self.radius ** 2。
+    radius_squared: Number = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "radius_squared", self.radius ** 2)
 
     def intersect(self, ray: Ray) -> tuple[float, float]:
         """
@@ -45,7 +50,7 @@ class Sphere:
         oc = ray.origin - self.center
         a: Number = ray.direction @ ray.direction
         half_b: Number = oc @ ray.direction
-        c: Number = oc @ oc - self.radius ** 2
+        c: Number = oc @ oc - self.radius_squared
 
         discriminant: Number = half_b * half_b - a * c
 
