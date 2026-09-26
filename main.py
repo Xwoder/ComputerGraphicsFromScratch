@@ -9,7 +9,7 @@ from Light.AmbientLight import AmbientLight
 from Light.DirectionalLight import DirectionalLight
 from Light.Light import Light
 from Light.PointLight import PointLight
-from Matrix import Matrix
+from RotationMatrix import RotationMatrix
 from Number import Number
 from Point3 import Point3
 from Renderer import Renderer
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     rot_y: Number = math.radians(random.uniform(-2, 2))
     rot_z: Number = math.radians(random.uniform(-2, 2))
     camera: Camera = Camera(
-        rotation=Matrix.rotation((rot_x, rot_y, rot_z)),
+        rotation=RotationMatrix.from_euler((rot_x, rot_y, rot_z)),
     )
 
     spheres: list[Sphere] = [
