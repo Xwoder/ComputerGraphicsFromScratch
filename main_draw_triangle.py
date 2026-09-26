@@ -14,7 +14,9 @@ DrawWireframeTriangle(P0, P1, P2, color)：依次用 DrawLine 连接三条边
 """
 
 import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
 from matplotlib.ticker import MultipleLocator
+import numpy as np
 
 from matplotlib_tools import configure_chinese_font
 from Point2D import Point2D
@@ -50,40 +52,19 @@ def main():
     P0, P1, P2 = vertices
 
     wire_cells = draw_wireframe_triangle(P0, P1, P2)
-    fill_cells = Canvas2D.draw_filled_triangle(P0, P1, P2)
+
+    # 填充三角形：对每条扫描线取该行的左、右两个端点（左右起点），再用
+    # Canvas2D.draw_line 在它们之间画一条水平线段，逐行就把三角形填满——
+    # 即“用画线的方法”填充，与线框共用同一个 draw_line 原语。
+    scanlines = Canvas2D.fill_triangle_scanlines(P0, P1, P2)
+    fill_cells = set()
+    for y, xl, xr in scanlines:
+        fill_cells.update(Canvas2D.draw_line(Point2D(xl, y), Point2D(xr, y)))
 
     # 用 Matplotlib 绘制
     fig, ax = plt.subplots(figsize=(10, 10))
 
-    # 理想三角形（淡灰连续，作为栅格化的参考，本身不是三角形线框的颜色）
-    ax.plot([P0.x, P1.x, P2.x, P0.x],
-            [P0.y, P1.y, P2.y, P0.y],
-            color="gray", lw=1.2, alpha=0.4, zorder=1)
-
-    # 填充三角形：红色实心方格（按题目要求使用红色），置于底层
-    for x, y in fill_cells:
-        if 0 <= x < GRID and 0 <= y < GRID:
-            ax.add_patch(plt.Rectangle((x, y), 1, 1,
-                                       facecolor="red", edgecolor="none",
-                                       alpha=0.55, zorder=2))
-
-    # 线框三角形：黑色实心方格描边，置于填充之上，凸显边界
-    for x, y in wire_cells:
-        if 0 <= x < GRID and 0 <= y < GRID:
-            ax.add_patch(plt.Rectangle((x, y), 1, 1,
-                                       facecolor="black", edgecolor="none",
-                                       alpha=0.9, zorder=3))
-
-    # 三个顶点的文字标签。
-    # P0 是最低点，三角形内部在其上方，故把 P0 标签放到下方（外侧）；
-    # P1/P2 放在右上方，既避开黑色栅格单元又不压在三角形内部。
-    offsets = {"P0": (0, -2), "P1": (0, -2), "P2": (0, 1)}
-    for label, p in (("P0", P0), ("P1", P1), ("P2", P2)):
-        dx, dy = offsets[label]
-        ax.text(p.x + dx, p.y + dy, label,
-                fontsize=14, color="black", zorder=4)
-
-    # 坐标轴与栅格（与第一、三象限正半轴对齐）
+    # 坐标轴与栅格（与第一、三象限正半轴对齐）：先定范围，便于后续换算标记尺寸
     ax.set_xlim(0, GRID)
     ax.set_ylim(0, GRID)
     ax.set_aspect("equal", adjustable="box")
@@ -98,6 +79,39 @@ def main():
     ax.set_xlabel("x")
     ax.set_ylabel("y")
     ax.set_title("三角形的线框栅格画法（Wireframe Triangle）")
+
+    # 理想三角形（淡灰连续，作为栅格化的参考，置于填充之上便于对比边界）
+    ax.plot([P0.x, P1.x, P2.x, P0.x],
+            [P0.y, P1.y, P2.y, P0.y],
+            color="gray", lw=1.2, alpha=0.6, zorder=3)
+
+    # 用 imshow 把“被点亮的栅格单元”当成一个 GRID×GRID 的数据网格来绘制。
+    # 每个单元在数据坐标里是精确的 1×1，所以无论怎么放大都不会出现间隙
+    # （之前的 ax.hlines 线宽以屏幕点数固定，放大后相对格子变窄、露出白缝）。
+    # 注意：栅格化（哪些格子该亮）仍由上面的 draw_line 逐行算出，这里只负责可视化。
+    grid = np.zeros((GRID, GRID), dtype=int)  # 索引 [y, x]
+    for x, y in fill_cells:
+        if 0 <= x < GRID and 0 <= y < GRID:
+            grid[y, x] = 1            # 1: 红色填充
+    for x, y in wire_cells:
+        if 0 <= x < GRID and 0 <= y < GRID:
+            grid[y, x] = 2            # 2: 黑色线框（覆盖在填充之上）
+    cmap = ListedColormap([
+        (0.0, 0.0, 0.0, 0.0),         # 0: 透明
+        (1.0, 0.0, 0.0, 0.55),        # 1: 红色填充
+        (0.0, 0.0, 0.0, 1.0),         # 2: 黑色线框
+    ])
+    ax.imshow(grid, origin="lower", extent=[0, GRID, 0, GRID],
+              cmap=cmap, interpolation="nearest", zorder=2)
+
+    # 三个顶点的文字标签。
+    # P0 是最低点，三角形内部在其上方，故把 P0 标签放到下方（外侧）；
+    # P1/P2 放在右上方，既避开黑色栅格单元又不压在三角形内部。
+    offsets = {"P0": (0, -2), "P1": (0, -2), "P2": (0, 1)}
+    for label, p in (("P0", P0), ("P1", P1), ("P2", P2)):
+        dx, dy = offsets[label]
+        ax.text(p.x + dx, p.y + dy, label,
+                fontsize=14, color="black", zorder=4)
 
     plt.tight_layout()
     # 保存为 PNG 图片

@@ -88,19 +88,17 @@ class Canvas2D:
         return cells
 
     @staticmethod
-    def draw_filled_triangle(p0: Point2D,
-                             p1: Point2D,
-                             p2: Point2D):
-        """填充三角形（扫描线算法）：返回被点亮的栅格单元集合（实心填充）。
+    def fill_triangle_scanlines(p0: Point2D,
+                                p1: Point2D,
+                                p2: Point2D) -> list[tuple[int, int, int]]:
+        """三角形填充的扫描线：返回每一行的 (y, x_left, x_right)。
 
-        对应 Gabriel Gambetta《Computer Graphics from Scratch》的
-        DrawFilledTriangle(P0, P1, P2, color)，按 y 升序排序后用
-        Interpolate 沿扫描线插值每条边的 x 坐标，再逐行填充：
-          ❶ 吸附到最近栅格并按 y 升序排序，使 y0 <= y1 <= y2；
-          ❷ 沿 y 插值三条边的 x：x01（上短边）、x12（下短边）、x02（长边）；
-          ❸ 去掉 x01 末项后与 x12 拼接成覆盖 y0..y2 的 x012；
-          ❹ 比较中点处 x02 与 x012 判定左/右边界；
-          ❺ 每条扫描线从 x_left 到 x_right 逐像素点亮。
+        对应 Gabriel Gambetta 的 DrawFilledTriangle 思路：按 y 升序排序后沿
+        扫描线插值三条边的 x 坐标，比较中点判定左/右边界，得到每条扫描线在 y
+        处的左右端点 x。返回的每行 (y, x_left, x_right) 可直接交给 draw_line
+        连成一条水平线段——“用画线的方法”逐行填满三角形。
+
+        返回：list of (y, xl, xr)，y 从最小到最大递增。
         """
         # ❶ 端点先吸附到最近整数栅格（与 draw_line 语义一致），再按 y 升序排序
         a: Point2D = Point2D(round(p0.x), round(p0.y))
@@ -132,11 +130,25 @@ class Canvas2D:
         else:
             x_left, x_right = x012, x02
 
-        # ❺ 逐条扫描线填充
-        cells = set()
+        # ❺ 逐条扫描线记录左右端点（四舍五入吸附到栅格列）
+        rows: list[tuple[int, int, int]] = []
         for y in range(y0, y2 + 1):
-            xl = x_left[y - y0]
-            xr = x_right[y - y0]
-            for x in range(int(round(xl)), int(round(xr)) + 1):
-                cells.add((x, y))
+            xl = int(round(x_left[y - y0]))
+            xr = int(round(x_right[y - y0]))
+            rows.append((y, xl, xr))
+        return rows
+
+    @staticmethod
+    def draw_filled_triangle(p0: Point2D,
+                             p1: Point2D,
+                             p2: Point2D) -> set[tuple[int, int]]:
+        """填充三角形：复用 draw_line 在每条扫描线上画一条水平线段。
+
+        对 fill_triangle_scanlines 返回的每一行 (y, x_left, x_right)，调用
+        draw_line((x_left, y), (x_right, y)) 得到该行被点亮的栅格单元，并集后
+        即为实心填充——也就是“用画线方法”逐行填满三角形，与线框共用 draw_line。
+        """
+        cells: set[tuple[int, int]] = set()
+        for y, xl, xr in Canvas2D.fill_triangle_scanlines(p0, p1, p2):
+            cells.update(Canvas2D.draw_line(Point2D(xl, y), Point2D(xr, y)))
         return cells
