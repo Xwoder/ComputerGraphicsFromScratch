@@ -49,7 +49,8 @@ def main():
     vertices.sort(key=lambda p: p.y)
     P0, P1, P2 = vertices
 
-    cells = draw_wireframe_triangle(P0, P1, P2)
+    wire_cells = draw_wireframe_triangle(P0, P1, P2)
+    fill_cells = Canvas2D.draw_filled_triangle(P0, P1, P2)
 
     # 用 Matplotlib 绘制
     fig, ax = plt.subplots(figsize=(10, 10))
@@ -57,10 +58,17 @@ def main():
     # 理想三角形（淡灰连续，作为栅格化的参考，本身不是三角形线框的颜色）
     ax.plot([P0.x, P1.x, P2.x, P0.x],
             [P0.y, P1.y, P2.y, P0.y],
-            color="gray", lw=1.2, alpha=0.4, zorder=2)
+            color="gray", lw=1.2, alpha=0.4, zorder=1)
 
-    # 栅格化点亮的单元：黑色实心方格（线框三角形按题目要求使用黑色）
-    for x, y in cells:
+    # 填充三角形：红色实心方格（按题目要求使用红色），置于底层
+    for x, y in fill_cells:
+        if 0 <= x < GRID and 0 <= y < GRID:
+            ax.add_patch(plt.Rectangle((x, y), 1, 1,
+                                       facecolor="red", edgecolor="none",
+                                       alpha=0.55, zorder=2))
+
+    # 线框三角形：黑色实心方格描边，置于填充之上，凸显边界
+    for x, y in wire_cells:
         if 0 <= x < GRID and 0 <= y < GRID:
             ax.add_patch(plt.Rectangle((x, y), 1, 1,
                                        facecolor="black", edgecolor="none",
@@ -73,7 +81,7 @@ def main():
     for label, p in (("P0", P0), ("P1", P1), ("P2", P2)):
         dx, dy = offsets[label]
         ax.text(p.x + dx, p.y + dy, label,
-                fontsize=14, fontweight="bold", color="black", zorder=4)
+                fontsize=14, color="black", zorder=4)
 
     # 坐标轴与栅格（与第一、三象限正半轴对齐）
     ax.set_xlim(0, GRID)
@@ -95,7 +103,7 @@ def main():
     # 保存为 PNG 图片
     OUTPUT_PATH = "graph_triangle.png"
     fig.savefig(OUTPUT_PATH, dpi=400)
-    print(f"已保存： {OUTPUT_PATH}，点亮 {len(cells)} 个栅格单元")
+    print(f"已保存： {OUTPUT_PATH}，填充 {len(fill_cells)} 个栅格单元，线框 {len(wire_cells)} 个")
     plt.show()
 
 

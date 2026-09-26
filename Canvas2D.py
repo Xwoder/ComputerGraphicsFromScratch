@@ -7,7 +7,9 @@ Canvas2D 只承载「直线栅格化」这类 2D 绘制算法，不持有像素�
 
 算法参考 Gabriel Gambetta《Computer Graphics from Scratch》。
 """
+from typing import Any
 
+from Number import Number
 from Point2D import Point2D
 
 
@@ -15,17 +17,20 @@ class Canvas2D:
     """2D 直线栅格化原语集合（无状态，全部为静态方法）。"""
 
     @staticmethod
-    def interpolate(i0, d0, i1, d1):
+    def interpolate(i0: int,
+                    d0: int,
+                    i1: int,
+                    d1: int) -> list[float]:
         """沿 i 从 i0 到 i1 每步 +1，线性插值出对应的 d，返回浮点列表。
 
         返回长度 = |i1 - i0| + 1，列表第 k 个值对应 i = i0 + k。
         当 i0 == i1 时退化为仅含 d0 的单元素列表。
         """
         if i0 == i1:
-            return [d0]
-        values = []
-        a = (d1 - d0) / (i1 - i0)  # 每步增量
-        d = d0
+            return [float(d0)]
+        values: list[float] = []
+        a: float = (d1 - d0) / (i1 - i0)  # 每步增量
+        d: float = d0
         for i in range(i0, i1 + 1):
             values.append(d)
             d = d + a
@@ -40,24 +45,30 @@ class Canvas2D:
           - 偏竖直：y 为主轴，对每个 y 插值出 x。
         起点顺序始终保证主轴坐标递增，从而保证采样方向一致。
         """
-        cells = []
+        cells: list[tuple[int, int]] = []
         # 栅格坐标必须为整数：端点先吸附到最近的栅格单元（round），
-        # 与数据轴 int(round(...)) 的语义保持一致；int() 会向零截断，
-        # 对 99.4/98.7 这类浮点端点会造成线段少画、落错格子。
-        x0, y0 = round(p0.x), round(p0.y)
-        x1, y1 = round(p1.x), round(p1.y)
+        # 并用 Point2D 封装 (x, y)。交换端点时用 Point2D 整体交换
+        # （a, b = b, a），比四元组交换 x0,y0,x1,y1 更清晰、不会把 x/y 配对弄错。
+        # 注意 Point2D.x 标注为 Number，故交换后再显式转 int 供 range/下标使用
+        # （int() 会向零截断，对 99.4/98.7 这类浮点端点会造成线段少画、落错格子）。
+        a: Point2D = Point2D(round(p0.x), round(p0.y))
+        b: Point2D = Point2D(round(p1.x), round(p1.y))
 
-        if abs(x1 - x0) > abs(y1 - y0):
+        if abs(b.x - a.x) > abs(b.y - a.y):
             # 偏水平：确保 x 递增
-            if x0 > x1:
-                x0, y0, x1, y1 = x1, y1, x0, y0
+            if a.x > b.x:
+                a, b = b, a
+            x0, y0 = int(a.x), int(a.y)
+            x1, y1 = int(b.x), int(b.y)
             ys = Canvas2D.interpolate(x0, y0, x1, y1)
             for x in range(x0, x1 + 1):
                 cells.append((x, int(round(ys[x - x0]))))
         else:
             # 偏竖直：确保 y 递增
-            if y0 > y1:
-                x0, y0, x1, y1 = x1, y1, x0, y0
+            if a.y > b.y:
+                a, b = b, a
+            x0, y0 = int(a.x), int(a.y)
+            x1, y1 = int(b.x), int(b.y)
             xs = Canvas2D.interpolate(y0, x0, y1, x1)
             for y in range(y0, y1 + 1):
                 cells.append((int(round(xs[y - y0])), y))
@@ -74,4 +85,58 @@ class Canvas2D:
             y = k * x + intercept
             cells.append((x, int(round(y))))  # 最邻近栅格化：每列只点亮一个单元
             x += 1
+        return cells
+
+    @staticmethod
+    def draw_filled_triangle(p0: Point2D,
+                             p1: Point2D,
+                             p2: Point2D):
+        """填充三角形（扫描线算法）：返回被点亮的栅格单元集合（实心填充）。
+
+        对应 Gabriel Gambetta《Computer Graphics from Scratch》的
+        DrawFilledTriangle(P0, P1, P2, color)，按 y 升序排序后用
+        Interpolate 沿扫描线插值每条边的 x 坐标，再逐行填充：
+          ❶ 吸附到最近栅格并按 y 升序排序，使 y0 <= y1 <= y2；
+          ❷ 沿 y 插值三条边的 x：x01（上短边）、x12（下短边）、x02（长边）；
+          ❸ 去掉 x01 末项后与 x12 拼接成覆盖 y0..y2 的 x012；
+          ❹ 比较中点处 x02 与 x012 判定左/右边界；
+          ❺ 每条扫描线从 x_left 到 x_right 逐像素点亮。
+        """
+        # ❶ 端点先吸附到最近整数栅格（与 draw_line 语义一致），再按 y 升序排序
+        a: Point2D = Point2D(round(p0.x), round(p0.y))
+        b: Point2D = Point2D(round(p1.x), round(p1.y))
+        c: Point2D = Point2D(round(p2.x), round(p2.y))
+        if b.y < a.y:
+            a, b = b, a
+        if c.y < a.y:
+            a, c = c, a
+        if c.y < b.y:
+            b, c = c, b
+        x0, y0 = int(a.x), int(a.y)
+        x1, y1 = int(b.x), int(b.y)
+        x2, y2 = int(c.x), int(c.y)
+
+        # ❷ 沿 y 插值每条边的 x 坐标（interpolate(i0, d0, i1, d1)：i 取 y，d 取 x）
+        x01: list[float] = Canvas2D.interpolate(y0, x0, y1, x1)
+        x12: list[float] = Canvas2D.interpolate(y1, x1, y2, x2)
+        x02: list[float] = Canvas2D.interpolate(y0, x0, y2, x2)
+
+        # ❸ 去掉 x01 末项（y1 处与 x12 首项重复），拼接两条短边
+        x01.pop()
+        x012 = x01 + x12
+
+        # ❹ 比较中点，判定左 / 右边界
+        m = len(x012) // 2
+        if x02[m] < x012[m]:
+            x_left, x_right = x02, x012
+        else:
+            x_left, x_right = x012, x02
+
+        # ❺ 逐条扫描线填充
+        cells = set()
+        for y in range(y0, y2 + 1):
+            xl = x_left[y - y0]
+            xr = x_right[y - y0]
+            for x in range(int(round(xl)), int(round(xr)) + 1):
+                cells.add((x, y))
         return cells
