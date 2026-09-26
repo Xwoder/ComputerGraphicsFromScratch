@@ -73,9 +73,9 @@ def main():
     # 但结构上已允许后续各线段使用不同的起点，无需改动循环。
     # 颜色用 (R, G, B) 表示，对应原 Matplotlib 的 tab:red / tab:orange / tab:green。
     LINES = [
-        Line(startPoint, Point2D(90, 46), color=(255, 45, 85), name=r"y = (1/2)x + 1"),
-        Line(startPoint, Point2D(98, 99), color=(255, 153, 51), name="y = x + 1"),
-        Line(startPoint, Point2D(32, 97), color=(44, 170, 80), name="y = 3x + 1"),
+        Line(start=startPoint, end=Point2D(90, 46), color=(255, 45, 85), name=r"y = (1/2)x + 1"),
+        Line(start=startPoint, end=Point2D(98, 99), color=(255, 153, 51), name="y = x + 1"),
+        Line(start=startPoint, end=Point2D(32, 97), color=(44, 170, 80), name="y = 3x + 1"),
     ]
 
     print("=" * 60)
