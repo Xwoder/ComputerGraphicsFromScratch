@@ -1,7 +1,7 @@
 import math
 from dataclasses import dataclass, field
 
-from Color import Color, WHITE
+from Color import Color
 from Interval import Interval
 from Light.Light import Light
 from Number import Number
@@ -18,7 +18,7 @@ class Scene:
     spheres: list[Sphere] = field(default_factory=list)
     lights: list[Light] = field(default_factory=list)
 
-    BACKGROUND_COLOR: Color = WHITE
+    BACKGROUND_COLOR: Color = Color.BLACK
 
     def closestIntersection(self, ray: Ray, interval: Interval) -> tuple[Sphere | None, Number]:
         """

@@ -2,7 +2,7 @@ import math
 
 from dataclasses import dataclass
 
-from Color import WHITE, Color
+from Color import  Color
 from Number import Number
 from Point3 import Point3
 from Ray import Ray
@@ -16,7 +16,7 @@ class Sphere:
 
     center: Point3
     radius: Number
-    color: Color = WHITE
+    color: Color = Color.WHITE
     specular: Number = 0
     reflective: Number = 0
 
