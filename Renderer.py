@@ -5,6 +5,7 @@ from Point3 import Point3
 from Ray import Ray
 from RayTracer import RayTracer
 from Scene import Scene
+from Vec3 import Vec3
 from Viewport import Viewport
 
 
@@ -49,10 +50,12 @@ class Renderer:
                     y,
                 )
 
-                ray: Ray = Ray(
-                    self._camera.origin,
-                    target - self._camera.origin,
+                # CanvasToViewport 给的是相机局部坐标系下的方向（z = 视口距离），
+                # 用相机朝向矩阵旋转到世界坐标系，再从相机位置发出射线。
+                direction: Vec3 = self._camera.rotation.transform(
+                    Vec3(target.x, target.y, target.z),
                 )
+                ray: Ray = Ray(self._camera.origin, direction)
 
                 color: Color = tracer.traceRay(ray)
                 canvas.putPixel(

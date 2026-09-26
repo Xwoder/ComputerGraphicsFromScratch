@@ -1,6 +1,7 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from Canvas import Canvas
+from Matrix import Matrix
 from Point3 import Point3
 from Viewport import Viewport
 
@@ -8,10 +9,15 @@ from Viewport import Viewport
 @dataclass
 class Camera:
     """
-    相机：提供视线起点（origin）。
+    相机：提供视线起点（origin）与朝向（rotation）。
+
+    - origin：相机在世界坐标系中的位置。
+    - rotation：3×3 旋转矩阵（Matrix），把视口局部方向变换到世界方向。
+      默认单位矩阵，即相机不旋转、看向 +z（与旧版行为一致）。
     """
 
     origin: Point3 = Point3(0, 0, 0)
+    rotation: Matrix = field(default_factory=Matrix.identity)
 
     @staticmethod
     def canvasToViewport(
