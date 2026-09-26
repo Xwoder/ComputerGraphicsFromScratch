@@ -167,7 +167,8 @@ class Canvas2D:
                              h0: float,
                              h1: float,
                              h2: float,
-                             alpha: float = 1.0) -> None:
+                             alpha: float = 1.0,
+                             skip: "set[tuple[int, int]] | None" = None) -> None:
         """带插值着色的三角形（Shaded Triangle）。
 
         对应 Gabriel Gambetta《Computer Graphics from Scratch》中的
@@ -182,6 +183,8 @@ class Canvas2D:
              取中点比较 x02 与 x012，判定左 / 右边界。
           ❹ 逐条扫描线：对每行左右端点再做一次 h 的水平插值，
              遍历 [x_l, x_r] 每个像素写 color * h。
+        skip：可选集合，元素为 (x, y) 整数坐标；填充时会跳过这些单元，
+             便于先画好的边框线不被内部着色覆盖（而非事后重绘覆盖）。
         """
         # 端点先吸附到最近整数栅格（与 draw_line 语义一致）
         a: Point2D = Point2D(round(p0.x), round(p0.y))
@@ -235,6 +238,8 @@ class Canvas2D:
             x_r = round(x_right[y - y0])
             h_segment = Canvas2D.interpolate(x_l, h_left[y - y0], x_r, h_right[y - y0])
             for x in range(x_l, x_r + 1):
+                if skip is not None and (x, y) in skip:
+                    continue
                 h = h_segment[x - x_l]
                 shaded = color * h          # Color.__mul__ 已做 0~255 钳制
                 self.putPixel(x, y, (shaded.red / 255.0,

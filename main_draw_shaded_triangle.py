@@ -37,16 +37,22 @@ def main(base_color: str = "red",
     base_color_obj = color_spec_to_color(base_color)
 
     canvas = Canvas2D(GRID, GRID)
+
+    # 先画出三条边的线框（边框像素写入缓冲），随后填充时通过 skip 跳过这些
+    # 边框单元，使内部着色不会覆盖原本的边框线（而非事后重绘覆盖）。
+    wire_cells: set[tuple[int, int]] = set()
+    for pa, pb in ((P0, P1), (P1, P2), (P2, P0)):
+        for c in Canvas2D.draw_line(pa, pb):
+            wx, wy = int(c.x), int(c.y)
+            wire_cells.add((wx, wy))
+            canvas.putPixel(wx, wy, (0.0, 0.0, 0.0, 1.0))
+
     canvas.draw_shaded_triangle(
         P0, P1, P2,
         color=base_color_obj,
         h0=h0, h1=h1, h2=h2,
+        skip=wire_cells,
     )
-
-    # 线框：在着色填充之上重绘三条边，保证边界边线不被填充盖住
-    for pa, pb in ((P0, P1), (P1, P2), (P2, P0)):
-        for c in Canvas2D.draw_line(pa, pb):
-            canvas.putPixel(c.x, c.y, (0.0, 0.0, 0.0, 1.0))
 
     # 用 Matplotlib 绘制
     fig, ax = plt.subplots(figsize=(10, 10))
