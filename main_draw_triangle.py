@@ -96,7 +96,7 @@ def main(fill_color="red", wire_color="black", fill_alpha=0.55):
     for x, y in wire_cells:
         if 0 <= x < GRID and 0 <= y < GRID:
             canvas.putPixel(x, y, to_rgba(wire_color, 1.0))          # 线框（覆盖填充）
-    ax.imshow(canvas.as_array(), origin="lower", extent=[0, GRID, 0, GRID],
+    ax.imshow(canvas.as_array(), origin="lower", extent=(0, GRID, 0, GRID),
               interpolation="nearest", zorder=2)
 
     # 三个顶点的文字标签。
