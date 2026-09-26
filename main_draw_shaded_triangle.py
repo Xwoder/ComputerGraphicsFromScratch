@@ -19,7 +19,7 @@ from ImageViewer import ImageViewer
 from Point2D import Point2D
 from plot_utils import (GRID, SCALE, W, H, PLOT_LEFT,
                         PLOT_RIGHT, PLOT_TOP, PLOT_BOTTOM, draw_ticks_and_labels,
-                        load_font)
+                        draw_grid, load_font)
 
 
 def cell_rect(cx: int, cy: int) -> list[int]:
@@ -37,21 +37,6 @@ def cell_rect(cx: int, cy: int) -> list[int]:
 def point_to_image(p: Point2D) -> tuple[float, float]:
     """把网格坐标点映射成图像坐标（用于绘制理想三角形与标签定位）。"""
     return PLOT_LEFT + p.x * SCALE, PLOT_BOTTOM - p.y * SCALE
-
-
-def draw_grid(draw: ImageDraw.ImageDraw) -> None:
-    """在绘图区画出 100×100 栅格：次刻度每 1 单元（浅灰）、主刻度每 10 单元（深灰）。"""
-    minor = (225, 225, 225, 255)
-    major = (160, 160, 160, 255)
-    for i in range(GRID + 1):
-        x = PLOT_LEFT + i * SCALE
-        y = PLOT_TOP + i * SCALE
-        # 竖线
-        draw.line([(x, PLOT_TOP), (x, PLOT_BOTTOM)],
-                  fill=major if i % 10 == 0 else minor, width=1)
-        # 横线
-        draw.line([(PLOT_LEFT, y), (PLOT_RIGHT, y)],
-                  fill=major if i % 10 == 0 else minor, width=1)
 
 
 def main() -> None:

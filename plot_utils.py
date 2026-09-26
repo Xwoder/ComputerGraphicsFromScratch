@@ -6,7 +6,7 @@
 
 from typing import cast
 
-from PIL import ImageFont
+from PIL import ImageDraw, ImageFont
 
 
 # ───────────────────────── 渲染参数 ─────────────────────────
@@ -26,6 +26,21 @@ PLOT_LEFT = MARGIN_LEFT
 PLOT_RIGHT = MARGIN_LEFT + PLOT_W
 PLOT_TOP = MARGIN_TOP
 PLOT_BOTTOM = MARGIN_TOP + PLOT_H  # 栅格 y=0 对应的图像 y（向下为正）
+
+
+def draw_grid(draw: ImageDraw.ImageDraw) -> None:
+    """在绘图区画出 GRID×GRID 栅格：次刻度每 1 单元（浅灰）、主刻度每 10 单元（深灰）。"""
+    minor = (225, 225, 225, 255)
+    major = (160, 160, 160, 255)
+    for i in range(GRID + 1):
+        x = PLOT_LEFT + i * SCALE
+        y = PLOT_TOP + i * SCALE
+        # 竖线
+        draw.line([(x, PLOT_TOP), (x, PLOT_BOTTOM)],
+                  fill=major if i % 10 == 0 else minor, width=1)
+        # 横线
+        draw.line([(PLOT_LEFT, y), (PLOT_RIGHT, y)],
+                  fill=major if i % 10 == 0 else minor, width=1)
 
 
 def draw_ticks_and_labels(draw,
