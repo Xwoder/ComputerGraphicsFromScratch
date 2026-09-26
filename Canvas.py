@@ -42,7 +42,7 @@ class Canvas:
         纯 ASCII 文本，可直接用文本编辑器查看，无需任何第三方依赖。
 
         Args:
-            path (Path): 输出文件路径，例如 Path("output.ppm")。
+            path (Path): 输出文件路径。
         """
 
         # 逐行构造并写入：每行像素拼成单个字符串后立即写出，不缓存整图，
