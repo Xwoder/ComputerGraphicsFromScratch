@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MultipleLocator
 
 from matplotlib_tools import configure_chinese_font
-from Point2 import Point2
+from Point2D import Point2D
 from Canvas2D import Canvas2D
 
 # 配置支持中文的字体，避免标题/图例中的中文显示为方块。
@@ -24,14 +24,14 @@ configure_chinese_font()
 
 def main():
     GRID = 100
-    A = Point2(0, 1)  # 三条直线的公共起始点 (0,1)
+    A = Point2D(0, 1)  # 三条直线的公共起始点 (0,1)
 
     # 要绘制的多条直线：(终点 P1, 颜色, 图例名)
     # 起点统一为 A=(0,1)，由 A 与 P1 反推斜率 k 与截距 b。
     LINES = [
-        (Point2(90, 46), "tab:red", r"$y = \frac{1}{2}x + 1$"),
-        (Point2(98, 99), "tab:orange", "y = x + 1"),
-        (Point2(32, 97), "tab:green", "y = 3x + 1"),
+        (Point2D(90, 46), "tab:red", r"$y = \frac{1}{2}x + 1$"),
+        (Point2D(98, 99), "tab:orange", "y = x + 1"),
+        (Point2D(32, 97), "tab:green", "y = 3x + 1"),
     ]
 
     print("=" * 60)

@@ -8,7 +8,7 @@ Canvas2D 只承载「直线栅格化」这类 2D 绘制算法，不持有像素�
 算法参考 Gabriel Gambetta《Computer Graphics from Scratch》。
 """
 
-from Point2 import Point2
+from Point2D import Point2D
 
 
 class Canvas2D:
@@ -32,7 +32,7 @@ class Canvas2D:
         return values
 
     @staticmethod
-    def draw_line(p0: Point2, p1: Point2):
+    def draw_line(p0: Point2D, p1: Point2D):
         """对称直线栅格化：返回被点亮的栅格单元坐标列表 [(x, y), ...]。
 
         算法依据 |Δx| 与 |Δy| 选取主轴：

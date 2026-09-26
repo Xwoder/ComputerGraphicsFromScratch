@@ -17,14 +17,14 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MultipleLocator
 
 from matplotlib_tools import configure_chinese_font
-from Point2 import Point2
+from Point2D import Point2D
 from Canvas2D import Canvas2D
 
 # 配置支持中文的字体，避免标题/图例中的中文显示为方块。
 configure_chinese_font()
 
 
-def draw_wireframe_triangle(p0: Point2, p1: Point2, p2: Point2):
+def draw_wireframe_triangle(p0: Point2D, p1: Point2D, p2: Point2D):
     """线框三角形：连接 (P0,P1)、(P1,P2)、(P2,P0) 三条边。
 
     返回三条边被点亮的栅格单元集合（去重），供上层决定绘制颜色。
@@ -40,9 +40,9 @@ def draw_wireframe_triangle(p0: Point2, p1: Point2, p2: Point2):
 def main():
     GRID = 100
     # 三角形的三个顶点（栅格坐标；整数或浮点均可，draw_line 内部会吸附到最近单元）
-    P0 = Point2(10, 10)
-    P1 = Point2(90, 40)
-    P2 = Point2(60, 90)
+    P0 = Point2D(10, 10)
+    P1 = Point2D(90, 40)
+    P2 = Point2D(60, 90)
 
     cells = draw_wireframe_triangle(P0, P1, P2)
 
