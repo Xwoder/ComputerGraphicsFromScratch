@@ -1,8 +1,7 @@
 import math
-
 from dataclasses import dataclass, field
 
-from Color import  Color
+from Color import Color
 from Number import Number
 from Point3 import Point3
 from Ray import Ray
@@ -25,7 +24,7 @@ class Sphere:
     def __post_init__(self) -> None:
         object.__setattr__(self, "radius_squared", self.radius ** 2)
 
-    def intersect(self, ray: Ray) -> tuple[float, float]:
+    def intersect(self, ray: Ray) -> tuple[Number, Number]:
         """
         求射线与球体的交点参数（ray-tracing 的解析求根）。
 
@@ -43,7 +42,7 @@ class Sphere:
             ray (Ray): 待求交的射线（direction 不必是单位向量）。
 
         Returns:
-            tuple[float, float]: (t1, t2)，满足 t1 <= t2 的两个交点参数；
+            tuple[Number, Number]: (t1, t2)，满足 t1 <= t2 的两个交点参数；
             未命中时返回 (inf, inf)，便于调用方直接用 `t in interval` 过滤。
         """
 
