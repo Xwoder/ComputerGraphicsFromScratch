@@ -4,6 +4,11 @@
 100×100 栅格布局，并把坐标轴、刻度标签与标题的绘制逻辑集中在此，避免重复定义。
 """
 
+from typing import cast
+
+from PIL import ImageFont
+
+
 # ───────────────────────── 渲染参数 ─────────────────────────
 GRID = 100  # 栅格边长（100×100 单元）
 SCALE = 12  # 每个栅格单元对应的像素边长
@@ -56,3 +61,27 @@ def draw_ticks_and_labels(draw,
     draw.text((W // 2, MARGIN_TOP // 2 + 10),
               title,
               font=font_title, fill=(0, 0, 0, 255), anchor="mm")
+
+
+# macOS 自带中文字体候选（按顺序尝试）。注意 STHeiti Medium 正确扩展名为 .ttc，
+# 旧代码里曾误写成 ".ttc.ttc" 导致该候选失效；此处已修正并合并两脚本的候选。
+_FONT_CANDIDATES = [
+    "/System/Library/Fonts/STHeiti Light.ttc",
+    "/System/Library/Fonts/STHeiti Medium.ttc",
+    "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+    "/System/Library/Fonts/Supplemental/Songti.ttc",
+]
+
+
+def load_font(size: int) -> ImageFont.FreeTypeFont:
+    """加载支持中文的字体；若系统字体不可用则回退到默认字体。
+
+    macOS 自带 STHeiti / Arial Unicode 等中文字体，按顺序尝试。
+    """
+    for path in _FONT_CANDIDATES:
+        try:
+            return ImageFont.truetype(path, size)
+        except (OSError, IOError):
+            continue
+    # 回退：默认字体不是 FreeTypeFont，按类型转换以满足返回注解
+    return cast(ImageFont.FreeTypeFont, ImageFont.load_default())

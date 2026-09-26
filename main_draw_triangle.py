@@ -13,36 +13,15 @@ DrawWireframeTriangle(P0, P1, P2, color)：依次用 DrawLine 连接三条边
   4. 绘制结果保存为 graph_triangle.png（使用 Pillow 渲染，不依赖 Matplotlib）。
 """
 
-from typing import cast
-
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 
 from Canvas2D import Canvas2D
 from Color import Color
 from ImageViewer import ImageViewer
 from Point2D import Point2D
-from plot_utils import (GRID, SCALE, MARGIN_LEFT, MARGIN_RIGHT, MARGIN_TOP,
-                        MARGIN_BOTTOM, PLOT_W, PLOT_H, W, H, PLOT_LEFT,
-                        PLOT_RIGHT, PLOT_TOP, PLOT_BOTTOM, draw_ticks_and_labels)
-
-
-def load_font(size: int) -> ImageFont.FreeTypeFont:
-    """加载支持中文的字体；若系统字体不可用则回退到默认字体。
-
-    macOS 自带 STHeiti / Arial Unicode 等中文字体，按顺序尝试。
-    """
-    candidates = [
-        "/System/Library/Fonts/STHeiti Light.ttc",
-        "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
-        "/System/Library/Fonts/Supplemental/Songti.ttc",
-    ]
-    for path in candidates:
-        try:
-            return ImageFont.truetype(path, size)
-        except (OSError, IOError):
-            continue
-    # 回退：默认字体不是 FreeTypeFont，按类型转换以满足返回注解
-    return cast(ImageFont.FreeTypeFont, ImageFont.load_default())
+from plot_utils import (GRID, SCALE, W, H, PLOT_LEFT,
+                        PLOT_RIGHT, PLOT_TOP, PLOT_BOTTOM, draw_ticks_and_labels,
+                        load_font)
 
 
 def cell_rect(cx: int, cy: int) -> list[int]:
