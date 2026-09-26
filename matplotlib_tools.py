@@ -5,6 +5,9 @@
 """
 
 import matplotlib
+from matplotlib.colors import to_rgba
+
+from Color import Color
 
 
 def configure_chinese_font():
@@ -17,3 +20,14 @@ def configure_chinese_font():
     ]
     matplotlib.rcParams["font.family"] = "sans-serif"
     matplotlib.rcParams["axes.unicode_minus"] = False  # 正常显示负号
+
+
+def color_spec_to_color(color) -> Color:
+    """把 matplotlib 颜色规格（如 "red"、(1,0,0)、#ff0000）转成 Color 对象（0~255）。
+
+    供需要把颜色名当作着色基色、再与系数相乘（如 Canvas2D.draw_shaded_triangle
+    的 color * h）的场景复用。转换集中在此处，与 Canvas2D「不依赖 matplotlib」
+    的边界保持一致——调用方只需拿到纯 Color 对象。
+    """
+    r, g, b, _ = to_rgba(color)
+    return Color(int(round(r * 255)), int(round(g * 255)), int(round(b * 255)))
