@@ -10,6 +10,7 @@ Canvas2D 只承载「直线栅格化」这类 2D 绘制算法，不持有像素�
 from typing import Any
 
 import numpy as np
+from Color import Color
 from Number import Number
 from Point2D import Point2D
 
@@ -19,10 +20,14 @@ class Canvas2D:
 
     @staticmethod
     def interpolate(i0: int,
-                    d0: int,
+                    d0: Number,
                     i1: int,
-                    d1: int) -> list[float]:
+                    d1: Number) -> list[float]:
         """沿 i 从 i0 到 i1 每步 +1，线性插值出对应的 d，返回浮点列表。
+
+        i0 / i1 是插值用的整数索引（直接喂给 range）；d0 / d1 是被插值的
+        数值，可以是 int（如坐标 x）也可以是 float（如 draw_shaded_triangle
+        里的着色系数 h），故标注为 Number。
 
         返回长度 = |i1 - i0| + 1，列表第 k 个值对应 i = i0 + k。
         当 i0 == i1 时退化为仅含 d0 的单元素列表。
@@ -153,6 +158,89 @@ class Canvas2D:
         for y, xl, xr in Canvas2D.fill_triangle_scanlines(p0, p1, p2):
             cells.update(Canvas2D.draw_line(Point2D(xl, y), Point2D(xr, y)))
         return cells
+
+    def draw_shaded_triangle(self,
+                             p0: Point2D,
+                             p1: Point2D,
+                             p2: Point2D,
+                             color: Color,
+                             h0: float,
+                             h1: float,
+                             h2: float,
+                             alpha: float = 1.0) -> None:
+        """带插值着色的三角形（Shaded Triangle）。
+
+        对应 Gabriel Gambetta《Computer Graphics from Scratch》中的
+        DrawShadedTriangle(P0, P1, P2, color)：每个顶点带一个 h 着色系数
+        （通常 0~1），三角形内部每个像素的着色系数由顶点 h 先沿三条边、再沿
+        每条水平扫描线两次线性插值得到，最终颜色 = color * h_pixel。
+
+        算法步骤（标注 ❶~❹ 与书中一致）：
+          ❶ 三个顶点按 y 升序排序，使 y0 <= y1 <= y2（h 随点同步交换）。
+          ❷ 沿 y 插值三条边的 x 与 h（x01/h01、x12/h12、x02/h02）。
+          ❸ 去掉 x01/h01 末项（与 x12/h12 首行重复）拼接成 x012/h012；
+             取中点比较 x02 与 x012，判定左 / 右边界。
+          ❹ 逐条扫描线：对每行左右端点再做一次 h 的水平插值，
+             遍历 [x_l, x_r] 每个像素写 color * h。
+        """
+        # 端点先吸附到最近整数栅格（与 draw_line 语义一致）
+        a: Point2D = Point2D(round(p0.x), round(p0.y))
+        b: Point2D = Point2D(round(p1.x), round(p1.y))
+        c: Point2D = Point2D(round(p2.x), round(p2.y))
+
+        # ❶ 按 y 升序排序，并同步带着各自的 h 值一起交换（保证 y0 <= y1 <= y2）
+        pts = [a, b, c]
+        hs = [h0, h1, h2]
+        if pts[1].y < pts[0].y:
+            pts[0], pts[1] = pts[1], pts[0]
+            hs[0], hs[1] = hs[1], hs[0]
+        if pts[2].y < pts[0].y:
+            pts[0], pts[2] = pts[2], pts[0]
+            hs[0], hs[2] = hs[2], hs[0]
+        if pts[2].y < pts[1].y:
+            pts[1], pts[2] = pts[2], pts[1]
+            hs[1], hs[2] = hs[2], hs[1]
+
+        P0, P1, P2 = pts
+        x0, y0 = int(P0.x), int(P0.y)
+        x1, y1 = int(P1.x), int(P1.y)
+        x2, y2 = int(P2.x), int(P2.y)
+        h0, h1, h2 = hs
+
+        # ❷ 沿 y 插值三条边的 x 与 h
+        x01 = Canvas2D.interpolate(y0, x0, y1, x1)
+        h01 = Canvas2D.interpolate(y0, h0, y1, h1)
+        x12 = Canvas2D.interpolate(y1, x1, y2, x2)
+        h12 = Canvas2D.interpolate(y1, h1, y2, h2)
+        x02 = Canvas2D.interpolate(y0, x0, y2, x2)
+        h02 = Canvas2D.interpolate(y0, h0, y2, h2)
+
+        # ❸ 去掉两条短边的末项再拼接，避免 y1 行重复；取中点判定左 / 右边界
+        x01.pop()
+        h01.pop()
+        x012 = x01 + x12
+        h012 = h01 + h12
+
+        m = len(x012) // 2
+        if x02[m] < x012[m]:
+            x_left, x_right = x02, x012
+            h_left, h_right = h02, h012
+        else:
+            x_left, x_right = x012, x02
+            h_left, h_right = h012, h02
+
+        # ❹ 逐条扫描线：水平方向再插值一次 h，逐像素着色
+        for y in range(y0, y2 + 1):
+            x_l = round(x_left[y - y0])
+            x_r = round(x_right[y - y0])
+            h_segment = Canvas2D.interpolate(x_l, h_left[y - y0], x_r, h_right[y - y0])
+            for x in range(x_l, x_r + 1):
+                h = h_segment[x - x_l]
+                shaded = color * h          # Color.__mul__ 已做 0~255 钳制
+                self.putPixel(x, y, (shaded.red / 255.0,
+                                     shaded.green / 255.0,
+                                     shaded.blue / 255.0,
+                                     alpha))
 
     def __init__(self, width: int, height: int,
                  background: tuple[float, float, float, float] = (0.0, 0.0, 0.0, 0.0)):
