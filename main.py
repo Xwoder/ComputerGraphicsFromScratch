@@ -1,14 +1,17 @@
+import math
+import random
 from pathlib import Path
 
-from Light.AmbientLight import AmbientLight
 from Camera import Camera
 from Canvas import Canvas
 from Color import Color
+from Light.AmbientLight import AmbientLight
 from Light.DirectionalLight import DirectionalLight
 from Light.Light import Light
+from Light.PointLight import PointLight
+from Matrix import Matrix
 from Number import Number
 from Point3 import Point3
-from Light.PointLight import PointLight
 from Renderer import Renderer
 from Scene import Scene
 from Sphere import Sphere
@@ -31,7 +34,15 @@ if __name__ == '__main__':
     viewport: Viewport = Viewport(width=viewportWidth,
                                   height=viewportHeight,
                                   distance=1.0)
-    camera: Camera = Camera()
+
+    # 随机旋转相机：绕各轴取一个小角度，让视角每次运行都不同，
+    # 同时约束范围使球体仍基本留在画面内（每个轴 ±2°）。
+    rot_x: Number = math.radians(random.uniform(-2, 2))
+    rot_y: Number = math.radians(random.uniform(-2, 2))
+    rot_z: Number = math.radians(random.uniform(-2, 2))
+    camera: Camera = Camera(
+        rotation=Matrix.rotation((rot_x, rot_y, rot_z)),
+    )
 
     spheres: list[Sphere] = [
         Sphere(center=Point3(0, -1, 3), radius=1, color=Color(255, 0, 0), specular=500, reflective=0.2),
