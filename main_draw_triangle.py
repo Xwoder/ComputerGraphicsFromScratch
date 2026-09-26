@@ -15,7 +15,7 @@ DrawWireframeTriangle(P0, P1, P2, color)：依次用 DrawLine 连接三条边
 
 from typing import cast
 
-from PIL import Image, ImageDraw, ImageFont, ImageColor
+from PIL import Image, ImageDraw, ImageFont
 
 from Canvas2D import Canvas2D
 from Color import Color
@@ -58,16 +58,6 @@ def load_font(size: int) -> ImageFont.FreeTypeFont:
             continue
     # 回退：默认字体不是 FreeTypeFont，按类型转换以满足返回注解
     return cast(ImageFont.FreeTypeFont, ImageFont.load_default())
-
-
-def color_spec_to_color(color_spec) -> Color:
-    """把颜色规格（如 "red"、#ff0000）转成 Color 对象（0~255）。
-
-    用 Pillow 的 ImageColor 解析，取代原先依赖 Matplotlib 的 to_rgba 版本，
-    使本脚本完全脱离 Matplotlib。
-    """
-    r, g, b = ImageColor.getrgb(color_spec)
-    return Color(r, g, b)
 
 
 def cell_rect(cx: int, cy: int) -> list[int]:
@@ -148,7 +138,12 @@ def draw_wireframe_triangle(p0: Point2D, p1: Point2D, p2: Point2D):
     return cells
 
 
-def main(fill_color: Color = Color.RED, wire_color: Color = Color.BLACK, fill_alpha=0.55):
+def main() -> None:
+    # 颜色与透明度（固定写死，不通过命令行参数配置）
+    fill_color = Color.RED
+    wire_color = Color.BLACK
+    fill_alpha = 0.55
+
     # 三角形的三个顶点（栅格坐标；整数或浮点均可，draw_line 内部会吸附到最近单元）
     vertices = [Point2D(10, 10), Point2D(90, 40), Point2D(60, 90)]
 
@@ -227,11 +222,4 @@ def main(fill_color: Color = Color.RED, wire_color: Color = Color.BLACK, fill_al
 
 
 if __name__ == "__main__":
-    import sys
-
-    # 可选：python main_draw_triangle.py [fill_color] [wire_color]
-    # 例：python main_draw_triangle.py blue black
-    args = sys.argv[1:]
-    fill = color_spec_to_color(args[0]) if len(args) >= 1 else Color.RED
-    wire = color_spec_to_color(args[1]) if len(args) >= 2 else Color.BLACK
-    main(fill_color=fill, wire_color=wire)
+    main()
