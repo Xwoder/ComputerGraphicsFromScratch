@@ -90,12 +90,12 @@ def main(fill_color="red", wire_color="black", fill_alpha=0.55):
     # 每个单元在数据坐标里是精确的 1×1，任意放大都不会出现间隙（区别于早期
     # 用 ax.hlines 线宽固定点数、放大后露白缝的做法）。
     canvas = Canvas2D(GRID, GRID)
-    for x, y in fill_cells:
-        if 0 <= x < GRID and 0 <= y < GRID:
-            canvas.putPixel(x, y, to_rgba(fill_color, fill_alpha))   # 填充
-    for x, y in wire_cells:
-        if 0 <= x < GRID and 0 <= y < GRID:
-            canvas.putPixel(x, y, to_rgba(wire_color, 1.0))          # 线框（覆盖填充）
+    for c in fill_cells:
+        if 0 <= c.x < GRID and 0 <= c.y < GRID:
+            canvas.putPixel(c.x, c.y, to_rgba(fill_color, fill_alpha))   # 填充
+    for c in wire_cells:
+        if 0 <= c.x < GRID and 0 <= c.y < GRID:
+            canvas.putPixel(c.x, c.y, to_rgba(wire_color, 1.0))          # 线框（覆盖填充）
     ax.imshow(canvas.as_array(), origin="lower", extent=(0, GRID, 0, GRID),
               interpolation="nearest", zorder=2)
 

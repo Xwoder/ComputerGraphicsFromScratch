@@ -38,7 +38,7 @@ class Canvas2D:
         return values
 
     @staticmethod
-    def draw_line(p0: Point2D, p1: Point2D):
+    def draw_line(p0: Point2D, p1: Point2D) -> list[Point2D]:
         """对称直线栅格化：返回被点亮的栅格单元坐标列表 [(x, y), ...]。
 
         算法依据 |Δx| 与 |Δy| 选取主轴：
@@ -46,7 +46,7 @@ class Canvas2D:
           - 偏竖直：y 为主轴，对每个 y 插值出 x。
         起点顺序始终保证主轴坐标递增，从而保证采样方向一致。
         """
-        cells: list[tuple[int, int]] = []
+        cells: list[Point2D] = []
         # 栅格坐标必须为整数：端点先吸附到最近的栅格单元（round），
         # 并用 Point2D 封装 (x, y)。交换端点时用 Point2D 整体交换
         # （a, b = b, a），比四元组交换 x0,y0,x1,y1 更清晰、不会把 x/y 配对弄错。
@@ -63,7 +63,7 @@ class Canvas2D:
             x1, y1 = int(b.x), int(b.y)
             ys = Canvas2D.interpolate(x0, y0, x1, y1)
             for x in range(x0, x1 + 1):
-                cells.append((x, int(round(ys[x - x0]))))
+                cells.append(Point2D(x, int(round(ys[x - x0]))))
         else:
             # 偏竖直：确保 y 递增
             if a.y > b.y:
@@ -72,7 +72,7 @@ class Canvas2D:
             x1, y1 = int(b.x), int(b.y)
             xs = Canvas2D.interpolate(y0, x0, y1, x1)
             for y in range(y0, y1 + 1):
-                cells.append((int(round(xs[y - y0])), y))
+                cells.append(Point2D(int(round(xs[y - y0])), y))
         return cells
 
     @staticmethod
@@ -80,11 +80,11 @@ class Canvas2D:
         """朴素栅格化：x 每次递增 1，由 y = kx + b 得到浮点 y，
         再四舍五入到最近的栅格行，每个 x 只点亮一个栅格单元 (x, round(y))。
         作为 draw_line 的对照版本，用于演示无插值画法的失真。"""
-        cells = []
+        cells: list[Point2D] = []
         x = x_start
         while x <= x_end:
             y = k * x + intercept
-            cells.append((x, int(round(y))))  # 最邻近栅格化：每列只点亮一个单元
+            cells.append(Point2D(x, int(round(y))))  # 最邻近栅格化：每列只点亮一个单元
             x += 1
         return cells
 
@@ -142,14 +142,14 @@ class Canvas2D:
     @staticmethod
     def draw_filled_triangle(p0: Point2D,
                              p1: Point2D,
-                             p2: Point2D) -> set[tuple[int, int]]:
+                             p2: Point2D) -> set[Point2D]:
         """填充三角形：复用 draw_line 在每条扫描线上画一条水平线段。
 
         对 fill_triangle_scanlines 返回的每一行 (y, x_left, x_right)，调用
         draw_line((x_left, y), (x_right, y)) 得到该行被点亮的栅格单元，并集后
         即为实心填充——也就是“用画线方法”逐行填满三角形，与线框共用 draw_line。
         """
-        cells: set[tuple[int, int]] = set()
+        cells: set[Point2D] = set()
         for y, xl, xr in Canvas2D.fill_triangle_scanlines(p0, p1, p2):
             cells.update(Canvas2D.draw_line(Point2D(xl, y), Point2D(xr, y)))
         return cells

@@ -54,9 +54,9 @@ def main():
 
         # 栅格画法：每列只点亮一个最近的栅格单元（仅保留落在 100×100 内的）
         cells = Canvas2D.rasterize_line(k, b, A.x, x_end)
-        for x, y in cells:
-            if 0 <= y < GRID:
-                ax.add_patch(plt.Rectangle((x, y), 1, 1,
+        for c in cells:
+            if 0 <= c.y < GRID:
+                ax.add_patch(plt.Rectangle((c.x, c.y), 1, 1,
                                            facecolor=color, edgecolor="none",
                                            alpha=0.85, zorder=3))
         ax.scatter([], [], s=40, color=color, alpha=0.85,

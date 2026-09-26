@@ -58,9 +58,9 @@ def main():
         # 插值栅格化：沿主轴每步点亮一个最近的栅格单元（仅保留落在 100×100 内）
         cells = Canvas2D.draw_line(A, p1)
         print(f"  {name}：点亮 {len(cells)} 个栅格单元")
-        for x, y in cells:
-            if 0 <= x < GRID and 0 <= y < GRID:
-                ax.add_patch(plt.Rectangle((x, y), 1, 1,
+        for c in cells:
+            if 0 <= c.x < GRID and 0 <= c.y < GRID:
+                ax.add_patch(plt.Rectangle((c.x, c.y), 1, 1,
                                            facecolor=color, edgecolor="none",
                                            alpha=0.85, zorder=3))
         ax.scatter([], [], s=40, color=color, alpha=0.85,
