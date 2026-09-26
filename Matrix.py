@@ -2,9 +2,14 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from typing import TypeVar
 
 from Number import Number
 from Vec3 import Vec3
+
+# 绑定到 Matrix 的类型变量：让 __matmul__ 在子类上调用时，
+# 返回类型能正确推断为子类自身（如 RotationMatrix @ RotationMatrix -> RotationMatrix）。
+_T = TypeVar("_T", bound="Matrix")
 
 
 @dataclass(frozen=True)
@@ -95,7 +100,7 @@ class Matrix:
             .multiply(Matrix.rotation_z(rz))
         )
 
-    def __matmul__(self, other: Matrix) -> Matrix:
+    def __matmul__(self: _T, other: Matrix) -> _T:
         """矩阵乘法运算符（A @ B），通用维度，要求 A 列数 == B 行数。"""
         if self.column_count != other.row_count:
             raise ValueError(
