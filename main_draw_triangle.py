@@ -78,7 +78,7 @@ def main():
     ax.grid(True, which="minor", color="lightgray", lw=0.25)
     ax.set_xlabel("x")
     ax.set_ylabel("y")
-    ax.set_title("三角形的线框栅格画法（Wireframe Triangle）")
+    ax.set_title("三角形的线框栅格画法")
 
     # 理想三角形（淡灰连续，作为栅格化的参考，置于填充之上便于对比边界）
     ax.plot([P0.x, P1.x, P2.x, P0.x],
