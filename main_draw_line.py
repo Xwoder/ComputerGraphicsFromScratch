@@ -64,7 +64,7 @@ def main():
     ]
 
     print("=" * 60)
-    print(f"起始点 startPoint = {startPoint}，各直线截距 b = 1（均过 (0,1)）")
+    print(f"起始点 {startPoint}，各直线截距 b = 1")
     print("=" * 60)
 
     # 白色背景的 RGBA 画布
