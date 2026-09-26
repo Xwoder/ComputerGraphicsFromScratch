@@ -2,7 +2,7 @@
 使用 Pillow 以插值（Interpolate + DrawLine 算法）栅格画法绘制直线。
 
 设计要点：
-  1. 本版本对应 main_draw_line.py 的“无插值”画法，但采用 Gabriel Gambetta
+  1. 本版本对应 main_draw_line_naive.py 的“无插值”画法，但采用 Gabriel Gambetta
      《Computer Graphics from Scratch》中的对称直线算法：
      - Interpolate(i0, d0, i1, d1)：沿主坐标轴每步进 1，线性插值出另一个坐标。
      - DrawLine(P0, P1)：比较 |Δx| 与 |Δy| 决定“主轴”：
