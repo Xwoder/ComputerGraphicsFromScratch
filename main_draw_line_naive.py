@@ -22,7 +22,7 @@ from Point2D import Point2D
 
 
 # 每个栅格单元对应的像素边长
-SCALE = 8
+SCALE = 10
 GRID = 100
 W, H = GRID * SCALE, GRID * SCALE
 
