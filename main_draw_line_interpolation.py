@@ -19,25 +19,13 @@
   4. 绘制结果保存为 graph_line_with_interpolation.png。
 """
 
-from dataclasses import dataclass
-
 from PIL import Image, ImageDraw
 
 from Canvas2D import Canvas2D
+from Color import Color
 from ImageViewer import ImageViewer
+from LineByTwoPoints import LineByTwoPoints
 from Point2D import Point2D
-
-
-@dataclass(frozen=True)
-class Line:
-    """一条待绘制直线的几何与样式描述。
-
-    start：起点；end：终点；color：(R, G, B) 颜色；name：图例/标签名。
-    """
-    start: Point2D
-    end: Point2D
-    color: tuple[int, int, int]
-    name: str
 
 
 # 每个栅格单元对应的像素边长
@@ -77,12 +65,12 @@ def main():
     startPoint: Point2D = Point2D(0, 1)  # 三条直线的公共起始点 (0,1)
 
     # 要绘制的多条直线：用 Line 封装起点/终点/颜色/名称。
-    # 起点统一为 A=(0,1)（均过 (0,1)），颜色用 (R, G, B) 表示，
+    # 起点统一为 A=(0,1)（均过 (0,1)），颜色用 Color（RGB 0~255）表示，
     # 对应原 matplotlib 的 tab:red / tab:orange / tab:green。
     LINES = [
-        Line(start=startPoint, end=Point2D(90, 46), color=(255, 45, 85), name=r"y = (1/2)x + 1"),
-        Line(start=startPoint, end=Point2D(98, 99), color=(255, 153, 51), name="y = x + 1"),
-        Line(start=startPoint, end=Point2D(32, 97), color=(44, 170, 80), name="y = 3x + 1"),
+        LineByTwoPoints(start=startPoint, end=Point2D(90, 46), color=Color(255, 45, 85), name=r"y = (1/2)x + 1"),
+        LineByTwoPoints(start=startPoint, end=Point2D(98, 99), color=Color(255, 153, 51), name="y = x + 1"),
+        LineByTwoPoints(start=startPoint, end=Point2D(32, 97), color=Color(44, 170, 80), name="y = 3x + 1"),
     ]
 
     print("=" * 60)
@@ -101,7 +89,7 @@ def main():
         ax0, ay0 = point_to_image(line.start)
         ax1, ay1 = point_to_image(line.end)
         draw.line([(ax0, ay0), (ax1, ay1)],
-                  fill=(line.color[0], line.color[1], line.color[2], int(0.4 * 255)),
+                  fill=(line.color.red, line.color.green, line.color.blue, int(0.4 * 255)),
                   width=2)
 
         # 插值栅格化：沿主轴每步点亮一个最近的栅格单元（仅保留落在 100×100 内）
@@ -111,7 +99,7 @@ def main():
             if 0 <= c.x < GRID and 0 <= c.y < GRID:
                 rect = grid_to_image(int(c.x), int(c.y))
                 draw.rectangle(rect,
-                               fill=(line.color[0], line.color[1], line.color[2],
+                               fill=(line.color.red, line.color.green, line.color.blue,
                                      int(0.85 * 255)))
 
     # 保存为 PNG 图片
