@@ -1,5 +1,5 @@
 """
-使用插值（Interpolate + DrawLine 算法）以栅格画法绘制直线。
+使用 Pillow 以插值（Interpolate + DrawLine 算法）栅格画法绘制直线。
 
 设计要点：
   1. 本版本对应 main_draw_line.py 的“无插值”画法，但采用 Gabriel Gambetta
@@ -14,81 +14,113 @@
          - y = 0.5x + 1
          - y = x + 1
          - y = 3x + 1   （陡峭，最能体现插值版本与无插值版本的差异）
-  3. 用 Matplotlib 把被点亮的栅格单元（实心方格）画在 100×100 栅格上，
+  3. 用 Pillow 把被点亮的栅格单元（实心方格）画在 100×100 栅格上，
      并用淡色连续直线作为“理想直线”参考，便于对比栅格化误差。
   4. 绘制结果保存为 graph_line_with_interpolation.png。
 """
 
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MultipleLocator
+from dataclasses import dataclass
 
-from matplotlib_tools import configure_chinese_font
-from Point2D import Point2D
+from PIL import Image, ImageDraw
+
 from Canvas2D import Canvas2D
+from ImageViewer import ImageViewer
+from Point2D import Point2D
 
-# 配置支持中文的字体，避免标题/图例中的中文显示为方块。
-configure_chinese_font()
+
+@dataclass(frozen=True)
+class Line:
+    """一条待绘制直线的几何与样式描述。
+
+    start：起点；end：终点；color：(R, G, B) 颜色；name：图例/标签名。
+    """
+    start: Point2D
+    end: Point2D
+    color: tuple[int, int, int]
+    name: str
+
+
+# 每个栅格单元对应的像素边长
+SCALE = 8
+GRID = 100
+W, H = GRID * SCALE, GRID * SCALE
+
+
+def grid_to_image(x: int, y: int) -> tuple[int, int, int, int]:
+    """把栅格单元 (x, y) 映射成图像中的像素矩形 (left, top, right, bottom)。
+
+    Pillow 图像原点在左上、y 轴向下，而网格 y 轴向上，故按 (GRID - y - 1) 翻转。
+    """
+    left = x * SCALE
+    top = (GRID - y - 1) * SCALE
+    return left, top, left + SCALE, top + SCALE
+
+
+def point_to_image(p: Point2D) -> tuple[float, float]:
+    """把网格坐标点映射成图像坐标（用于绘制理想直线）。"""
+    return p.x * SCALE, (GRID - p.y) * SCALE
+
+
+def draw_grid(draw: ImageDraw.ImageDraw,
+              color: tuple[int, int, int, int] = (211, 211, 211, 255)) -> None:
+    """在图像上画出 GRID×GRID 的栅格（淡灰线，每 SCALE 像素一条）。
+
+    draw：已绑定到目标图像的 ImageDraw 对象；color：栅格线 RGBA 颜色。
+    """
+    for i in range(GRID + 1):
+        pos = i * SCALE
+        draw.line([(pos, 0), (pos, H)], fill=color, width=1)  # 竖线
+        draw.line([(0, pos), (W, pos)], fill=color, width=1)  # 横线
 
 
 def main():
-    GRID = 100
-    A = Point2D(0, 1)  # 三条直线的公共起始点
+    startPoint: Point2D = Point2D(0, 1)  # 三条直线的公共起始点 (0,1)
 
-    # 要绘制的多条直线：(终点 P1, 颜色, 图例名)
-    # 起点统一为 A=(0,1)，终点按各直线方程 y = kx + b 计算。
+    # 要绘制的多条直线：用 Line 封装起点/终点/颜色/名称。
+    # 起点统一为 A=(0,1)（均过 (0,1)），颜色用 (R, G, B) 表示，
+    # 对应原 matplotlib 的 tab:red / tab:orange / tab:green。
     LINES = [
-        (Point2D(90, 46), "tab:red", r"$y = \frac{1}{2}x + 1$"),   # k=0.5, 终点 x=90
-        (Point2D(98, 99), "tab:orange", "y = x + 1"),              # k=1.0, 终点 x=98
-        (Point2D(32, 97), "tab:green", "y = 3x + 1"),              # k=3.0, 陡峭，终点 x=32
+        Line(start=startPoint, end=Point2D(90, 46), color=(255, 45, 85), name=r"y = (1/2)x + 1"),
+        Line(start=startPoint, end=Point2D(98, 99), color=(255, 153, 51), name="y = x + 1"),
+        Line(start=startPoint, end=Point2D(32, 97), color=(44, 170, 80), name="y = 3x + 1"),
     ]
 
     print("=" * 60)
-    print(f"起始点 A = {A}，各直线截距 b = 1（均过 (0,1)），使用插值法栅格化")
+    print(f"起始点 {startPoint}，各直线截距 b = 1，使用插值法栅格化")
     print("=" * 60)
 
-    # 用 Matplotlib 绘制
-    fig, ax = plt.subplots(figsize=(10, 10))
+    # 白色背景的 RGBA 画布
+    img = Image.new("RGBA", (W, H), (255, 255, 255, 255))
+    draw = ImageDraw.Draw(img, "RGBA")
 
-    for p1, color, name in LINES:
+    # 先画 100×100 栅格（淡灰线）
+    draw_grid(draw)
+
+    for line in LINES:
         # 理想直线（淡色连续，作为栅格化的参考）
-        ax.plot([A.x, p1.x], [A.y, p1.y],
-                color=color, lw=1.2, alpha=0.4, zorder=2,
-                label=f"{name}")
+        ax0, ay0 = point_to_image(line.start)
+        ax1, ay1 = point_to_image(line.end)
+        draw.line([(ax0, ay0), (ax1, ay1)],
+                  fill=(line.color[0], line.color[1], line.color[2], int(0.4 * 255)),
+                  width=2)
 
         # 插值栅格化：沿主轴每步点亮一个最近的栅格单元（仅保留落在 100×100 内）
-        cells = Canvas2D.draw_line(A, p1)
-        print(f"  {name}：点亮 {len(cells)} 个栅格单元")
+        cells = Canvas2D.draw_line(line.start, line.end)
+        print(f"  {line.name}：点亮 {len(cells)} 个栅格单元")
         for c in cells:
             if 0 <= c.x < GRID and 0 <= c.y < GRID:
-                ax.add_patch(plt.Rectangle((c.x, c.y), 1, 1,
-                                           facecolor=color, edgecolor="none",
-                                           alpha=0.85, zorder=3))
-        ax.scatter([], [], s=40, color=color, alpha=0.85,
-                   label=f"{name} 栅格")
+                rect = grid_to_image(int(c.x), int(c.y))
+                draw.rectangle(rect,
+                               fill=(line.color[0], line.color[1], line.color[2],
+                                     int(0.85 * 255)))
 
-    # 坐标轴与栅格（与第一、三象限正半轴对齐）
-    ax.set_xlim(0, GRID)
-    ax.set_ylim(0, GRID)
-    ax.set_aspect("equal", adjustable="box")
-    # 主刻度每 10 个单位（带坐标标签）
-    ax.set_xticks(range(0, GRID + 1, 10))
-    ax.set_yticks(range(0, GRID + 1, 10))
-    # 次刻度每 1 个单位 -> 画出真正的 100×100 栅格
-    ax.xaxis.set_minor_locator(MultipleLocator(1))
-    ax.yaxis.set_minor_locator(MultipleLocator(1))
-    ax.grid(True, which="major", color="gray", lw=0.8)
-    ax.grid(True, which="minor", color="lightgray", lw=0.25)
-    ax.set_xlabel("x")
-    ax.set_ylabel("y")
-    ax.set_title("直线的插值式栅格画法")
-    ax.legend(loc="upper right")
-
-    plt.tight_layout()
     # 保存为 PNG 图片
     OUTPUT_PATH = "graph_line_with_interpolation.png"
-    fig.savefig(OUTPUT_PATH, dpi=400)
+    img.save(OUTPUT_PATH)
     print(f"已保存： {OUTPUT_PATH}")
-    plt.show()
+
+    # 保存后自动打开图片（按平台调用系统默认查看器）
+    ImageViewer.open_image(OUTPUT_PATH)
 
 
 if __name__ == "__main__":
