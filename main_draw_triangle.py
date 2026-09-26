@@ -14,9 +14,8 @@ DrawWireframeTriangle(P0, P1, P2, color)：依次用 DrawLine 连接三条边
 """
 
 import matplotlib.pyplot as plt
-from matplotlib.colors import ListedColormap
+from matplotlib.colors import to_rgba
 from matplotlib.ticker import MultipleLocator
-import numpy as np
 
 from matplotlib_tools import configure_chinese_font
 from Point2D import Point2D
@@ -39,7 +38,7 @@ def draw_wireframe_triangle(p0: Point2D, p1: Point2D, p2: Point2D):
     return cells
 
 
-def main():
+def main(fill_color="red", wire_color="black", fill_alpha=0.55):
     GRID = 100
     # 三角形的三个顶点（栅格坐标；整数或浮点均可，draw_line 内部会吸附到最近单元）
     vertices = [Point2D(10, 10), Point2D(90, 40), Point2D(60, 90)]
@@ -85,24 +84,20 @@ def main():
             [P0.y, P1.y, P2.y, P0.y],
             color="gray", lw=1.2, alpha=0.6, zorder=3)
 
-    # 用 imshow 把“被点亮的栅格单元”当成一个 GRID×GRID 的数据网格来绘制。
-    # 每个单元在数据坐标里是精确的 1×1，所以无论怎么放大都不会出现间隙
-    # （之前的 ax.hlines 线宽以屏幕点数固定，放大后相对格子变窄、露出白缝）。
-    # 注意：栅格化（哪些格子该亮）仍由上面的 draw_line 逐行算出，这里只负责可视化。
-    grid = np.zeros((GRID, GRID), dtype=int)  # 索引 [y, x]
+    # 用 Canvas2D 的帧缓冲 + PutPixel 逐格点亮像素点来绘制三角形。
+    # 栅格化（哪些格子该亮）仍由上面的 draw_line 逐行算出；这里用 PutPixel
+    # 把每个被点亮的栅格单元写入帧缓冲（颜色用 RGBA），再交给 imshow 渲染。
+    # 每个单元在数据坐标里是精确的 1×1，任意放大都不会出现间隙（区别于早期
+    # 用 ax.hlines 线宽固定点数、放大后露白缝的做法）。
+    canvas = Canvas2D(GRID, GRID)
     for x, y in fill_cells:
         if 0 <= x < GRID and 0 <= y < GRID:
-            grid[y, x] = 1            # 1: 红色填充
+            canvas.putPixel(x, y, to_rgba(fill_color, fill_alpha))   # 填充
     for x, y in wire_cells:
         if 0 <= x < GRID and 0 <= y < GRID:
-            grid[y, x] = 2            # 2: 黑色线框（覆盖在填充之上）
-    cmap = ListedColormap([
-        (0.0, 0.0, 0.0, 0.0),         # 0: 透明
-        (1.0, 0.0, 0.0, 0.55),        # 1: 红色填充
-        (0.0, 0.0, 0.0, 1.0),         # 2: 黑色线框
-    ])
-    ax.imshow(grid, origin="lower", extent=[0, GRID, 0, GRID],
-              cmap=cmap, interpolation="nearest", zorder=2)
+            canvas.putPixel(x, y, to_rgba(wire_color, 1.0))          # 线框（覆盖填充）
+    ax.imshow(canvas.as_array(), origin="lower", extent=[0, GRID, 0, GRID],
+              interpolation="nearest", zorder=2)
 
     # 三个顶点的文字标签。
     # P0 是最低点，三角形内部在其上方，故把 P0 标签放到下方（外侧）；
@@ -122,4 +117,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    # 可选：python main_draw_triangle.py [fill_color] [wire_color]
+    # 例：python main_draw_triangle.py blue black
+    args = sys.argv[1:]
+    fill = args[0] if len(args) >= 1 else "blue"
+    wire = args[1] if len(args) >= 2 else "black"
+    main(fill_color=fill, wire_color=wire)

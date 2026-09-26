@@ -9,6 +9,7 @@ Canvas2D 只承载「直线栅格化」这类 2D 绘制算法，不持有像素�
 """
 from typing import Any
 
+import numpy as np
 from Number import Number
 from Point2D import Point2D
 
@@ -152,3 +153,36 @@ class Canvas2D:
         for y, xl, xr in Canvas2D.fill_triangle_scanlines(p0, p1, p2):
             cells.update(Canvas2D.draw_line(Point2D(xl, y), Point2D(xr, y)))
         return cells
+
+    def __init__(self, width: int, height: int,
+                 background: tuple[float, float, float, float] = (0.0, 0.0, 0.0, 0.0)):
+        """创建一个 width×height 的 2D 帧缓冲（RGBA 浮点数组）。
+
+        与 3D 的 Canvas 不同，这里仅持有一个像素缓冲，不负责 PPM 输出
+        （那是 3D Canvas 的职责）；渲染交给上层（如 matplotlib.imshow）。
+        """
+        self.width = width
+        self.height = height
+        self.buffer = np.zeros((height, width, 4), dtype=float)
+        self.buffer[:] = background
+
+    def putPixel(self, x: float, y: float,
+                 color: tuple[float, float, float, float]) -> None:
+        """在帧缓冲 (x, y) 处点亮一个颜色为 color 的栅格单元。
+
+        color 为 (r, g, b, a)（各分量 0~1）；坐标先 round 吸附到最近整数
+        栅格，越界则忽略。这是 3D Canvas.putPixel 的 2D 对应版本，使
+        上层（如三角形绘制）可以逐格写入带颜色的像素。
+        """
+        xi = int(round(x))
+        yi = int(round(y))
+        if 0 <= xi < self.width and 0 <= yi < self.height:
+            self.buffer[yi, xi] = color
+
+    def Clear(self, background: tuple[float, float, float, float] = (0.0, 0.0, 0.0, 0.0)) -> None:
+        """把整个帧缓冲重置为 background。"""
+        self.buffer[:] = background
+
+    def as_array(self):
+        """返回 RGBA 帧缓冲（shape=(height, width, 4)），供 imshow 等渲染。"""
+        return self.buffer
