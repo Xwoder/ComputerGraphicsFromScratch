@@ -40,9 +40,14 @@ def draw_wireframe_triangle(p0: Point2D, p1: Point2D, p2: Point2D):
 def main():
     GRID = 100
     # 三角形的三个顶点（栅格坐标；整数或浮点均可，draw_line 内部会吸附到最近单元）
-    P0 = Point2D(10, 10)
-    P1 = Point2D(90, 40)
-    P2 = Point2D(60, 90)
+    vertices = [Point2D(10, 10), Point2D(90, 40), Point2D(60, 90)]
+
+    # 比较三个点的 Y 轴坐标，按升序排列：
+    #   位置最低（Y 最小） -> P0
+    #   第二高（Y 居中）   -> P1
+    #   最高点（Y 最大）   -> P2
+    vertices.sort(key=lambda p: p.y)
+    P0, P1, P2 = vertices
 
     cells = draw_wireframe_triangle(P0, P1, P2)
 
@@ -60,6 +65,15 @@ def main():
             ax.add_patch(plt.Rectangle((x, y), 1, 1,
                                        facecolor="black", edgecolor="none",
                                        alpha=0.9, zorder=3))
+
+    # 三个顶点的文字标签。
+    # P0 是最低点，三角形内部在其上方，故把 P0 标签放到下方（外侧）；
+    # P1/P2 放在右上方，既避开黑色栅格单元又不压在三角形内部。
+    offsets = {"P0": (0, -2), "P1": (0, -2), "P2": (0, 1)}
+    for label, p in (("P0", P0), ("P1", P1), ("P2", P2)):
+        dx, dy = offsets[label]
+        ax.text(p.x + dx, p.y + dy, label,
+                fontsize=14, fontweight="bold", color="black", zorder=4)
 
     # 坐标轴与栅格（与第一、三象限正半轴对齐）
     ax.set_xlim(0, GRID)
