@@ -12,13 +12,11 @@ DrawShadedTriangle(P0, P1, P2, color)：每个顶点带一个 h 着色系数（0
 """
 
 import matplotlib.pyplot as plt
-from matplotlib.colors import to_rgba
 from matplotlib.ticker import MultipleLocator
 
-from matplotlib_tools import configure_chinese_font
+from matplotlib_tools import configure_chinese_font, color_spec_to_color
 from Point2D import Point2D
 from Canvas2D import Canvas2D
-from Color import Color
 
 # 配置支持中文的字体，避免标题/图例中的中文显示为方块。
 configure_chinese_font()
@@ -36,8 +34,7 @@ def main(base_color: str = "red",
     P2 = Point2D(50, 90)
 
     # 把颜色名（如 "red"）转成 0~255 的 Color 对象，供着色缩放使用
-    r, g, b, _ = to_rgba(base_color)
-    base_color_obj = Color(int(round(r * 255)), int(round(g * 255)), int(round(b * 255)))
+    base_color_obj = color_spec_to_color(base_color)
 
     canvas = Canvas2D(GRID, GRID)
     canvas.draw_shaded_triangle(
@@ -45,6 +42,11 @@ def main(base_color: str = "red",
         color=base_color_obj,
         h0=h0, h1=h1, h2=h2,
     )
+
+    # 线框：在着色填充之上重绘三条边，保证边界边线不被填充盖住
+    for pa, pb in ((P0, P1), (P1, P2), (P2, P0)):
+        for c in Canvas2D.draw_line(pa, pb):
+            canvas.putPixel(c.x, c.y, (0.0, 0.0, 0.0, 1.0))
 
     # 用 Matplotlib 绘制
     fig, ax = plt.subplots(figsize=(10, 10))
