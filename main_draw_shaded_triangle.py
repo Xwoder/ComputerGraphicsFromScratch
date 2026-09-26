@@ -15,19 +15,18 @@ from typing import cast
 
 from PIL import Image, ImageDraw, ImageFont, ImageColor
 
-from Point2D import Point2D
 from Canvas2D import Canvas2D
 from Color import Color
 from ImageViewer import ImageViewer
-
+from Point2D import Point2D
 
 # ───────────────────────── 渲染参数 ─────────────────────────
-GRID = 100                 # 栅格边长（100×100 单元）
-SCALE = 12                 # 每个栅格单元对应的像素边长
-MARGIN_LEFT = 80           # 左侧留白（放 y 轴刻度标签）
+GRID = 100  # 栅格边长（100×100 单元）
+SCALE = 12  # 每个栅格单元对应的像素边长
+MARGIN_LEFT = 80  # 左侧留白（放 y 轴刻度标签）
 MARGIN_RIGHT = 50
-MARGIN_TOP = 90            # 顶部留白（放标题）
-MARGIN_BOTTOM = 80         # 底部留白（放 x 轴刻度标签 + 轴名）
+MARGIN_TOP = 90  # 顶部留白（放标题）
+MARGIN_BOTTOM = 80  # 底部留白（放 x 轴刻度标签 + 轴名）
 
 # 由 GRID / SCALE / 留白推导出的画布与绘图区尺寸
 PLOT_W = GRID * SCALE
@@ -37,7 +36,7 @@ H = MARGIN_TOP + PLOT_H + MARGIN_BOTTOM
 PLOT_LEFT = MARGIN_LEFT
 PLOT_RIGHT = MARGIN_LEFT + PLOT_W
 PLOT_TOP = MARGIN_TOP
-PLOT_BOTTOM = MARGIN_TOP + PLOT_H    # 栅格 y=0 对应的图像 y（向下为正）
+PLOT_BOTTOM = MARGIN_TOP + PLOT_H  # 栅格 y=0 对应的图像 y（向下为正）
 
 
 def load_font(size: int) -> ImageFont.FreeTypeFont:
@@ -46,8 +45,7 @@ def load_font(size: int) -> ImageFont.FreeTypeFont:
     macOS 自带 STHeiti / Arial Unicode 等中文字体，按顺序尝试。
     """
     candidates = [
-        "/System/Library/Fonts/STHeiti Light.ttc",
-        "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+        "/System/Library/Fonts/STHeiti Medium.ttc.ttc",
         "/System/Library/Fonts/Supplemental/Songti.ttc",
     ]
     for path in candidates:
@@ -131,7 +129,7 @@ def draw_ticks_and_labels(draw: ImageDraw.ImageDraw,
               font=font_title, fill=(0, 0, 0, 255), anchor="mm")
 
 
-def main(base_color: str = "red",
+def main(base_color: Color = Color.RED,
          h0: float = 0.0,
          h1: float = 1.0,
          h2: float = 0.4) -> None:
@@ -140,9 +138,6 @@ def main(base_color: str = "red",
     P0 = Point2D(15, 20)
     P1 = Point2D(85, 30)
     P2 = Point2D(50, 90)
-
-    # 把颜色名（如 "red"）转成 0~255 的 Color 对象，供着色缩放使用
-    base_color_obj = color_spec_to_color(base_color)
 
     canvas = Canvas2D(GRID, GRID)
 
@@ -166,7 +161,7 @@ def main(base_color: str = "red",
 
     canvas.draw_shaded_triangle(
         P0, P1, P2,
-        color=base_color_obj,
+        color=base_color,
         h0=h0, h1=h1, h2=h2,
         skip=wire_cells,
     )
@@ -179,7 +174,7 @@ def main(base_color: str = "red",
     draw_grid(draw)
 
     # 2) 把 Canvas2D 帧缓冲逐格绘制（线框 + 着色三角形）
-    arr = canvas.as_array()    # shape=(height, width, 4)，行索引 = 栅格 y
+    arr = canvas.as_array()  # shape=(height, width, 4)，行索引 = 栅格 y
     for y in range(GRID):
         for x in range(GRID):
             r, g, b, a = arr[y, x]
@@ -219,10 +214,11 @@ def main(base_color: str = "red",
 
 if __name__ == "__main__":
     import sys
+
     # 可选：python main_draw_shaded_triangle.py [base_color] [h0] [h1] [h2]
     # 例：python main_draw_shaded_triangle.py red 0 1 0.4
     args = sys.argv[1:]
-    cli_color = args[0] if len(args) >= 1 else "red"
+    cli_color = color_spec_to_color(args[0]) if len(args) >= 1 else Color.RED
     try:
         hv = [float(a) for a in args[1:4]]
     except ValueError:
