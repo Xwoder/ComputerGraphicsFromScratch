@@ -13,7 +13,7 @@ DrawShadedTriangle(P0, P1, P2, color)：每个顶点带一个 h 着色系数（0
 
 from typing import cast
 
-from PIL import Image, ImageDraw, ImageFont, ImageColor
+from PIL import Image, ImageDraw, ImageFont
 
 from Canvas2D import Canvas2D
 from Color import Color
@@ -55,16 +55,6 @@ def load_font(size: int) -> ImageFont.FreeTypeFont:
             continue
     # 回退：默认字体不是 FreeTypeFont，按类型转换以满足返回注解
     return cast(ImageFont.FreeTypeFont, ImageFont.load_default())
-
-
-def color_spec_to_color(color_spec) -> Color:
-    """把颜色规格（如 "red"、#ff0000）转成 Color 对象（0~255）。
-
-    用 Pillow 的 ImageColor 解析，取代原先依赖 Matplotlib 的 to_rgba 版本，
-    使本脚本完全脱离 Matplotlib。
-    """
-    r, g, b = ImageColor.getrgb(color_spec)
-    return Color(r, g, b)
 
 
 def cell_rect(cx: int, cy: int) -> list[int]:
@@ -129,10 +119,12 @@ def draw_ticks_and_labels(draw: ImageDraw.ImageDraw,
               font=font_title, fill=(0, 0, 0, 255), anchor="mm")
 
 
-def main(base_color: Color = Color.RED,
-         h0: float = 0.0,
-         h1: float = 1.0,
-         h2: float = 0.4) -> None:
+def main() -> None:
+    # 基色与每个顶点的着色系数 h（固定写死，不通过命令行参数配置）
+    base_color = Color.RED
+    h0: float = 0.0
+    h1: float = 1.0
+    h2: float = 0.4
     # 新的三角形顶点（栅格坐标），与线框示例 (10,10)/(90,40)/(60,90) 不同：
     #   顶点顺序与下面的 h 一一对应（draw_shaded_triangle 内部会按 y 排序）。
     P0 = Point2D(15, 20)
@@ -213,17 +205,4 @@ def main(base_color: Color = Color.RED,
 
 
 if __name__ == "__main__":
-    import sys
-
-    # 可选：python main_draw_shaded_triangle.py [base_color] [h0] [h1] [h2]
-    # 例：python main_draw_shaded_triangle.py red 0 1 0.4
-    args = sys.argv[1:]
-    cli_color = color_spec_to_color(args[0]) if len(args) >= 1 else Color.RED
-    try:
-        hv = [float(a) for a in args[1:4]]
-    except ValueError:
-        hv = []
-    arg_h0 = hv[0] if len(hv) >= 1 else 0.0
-    arg_h1 = hv[1] if len(hv) >= 2 else 1.0
-    arg_h2 = hv[2] if len(hv) >= 3 else 0.4
-    main(base_color=cli_color, h0=arg_h0, h1=arg_h1, h2=arg_h2)
+    main()
