@@ -43,6 +43,18 @@ def draw_grid(draw: ImageDraw.ImageDraw) -> None:
                   fill=major if i % 10 == 0 else minor, width=1)
 
 
+def cell_rect(cx: int, cy: int) -> list[int]:
+    """把栅格单元 (cx, cy) 映射成图像中的像素矩形 [left, top, right, bottom]。
+
+    Pillow 图像原点在左上、y 轴向下，而网格 y 轴向上，故按 (GRID - y) 翻转。
+    """
+    left = PLOT_LEFT + cx * SCALE
+    top = PLOT_BOTTOM - (cy + 1) * SCALE
+    right = PLOT_LEFT + (cx + 1) * SCALE
+    bottom = PLOT_BOTTOM - cy * SCALE
+    return [left, top, right, bottom]
+
+
 def draw_ticks_and_labels(draw,
                           font_tick,
                           font_axis,

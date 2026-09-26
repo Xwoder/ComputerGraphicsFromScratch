@@ -21,19 +21,7 @@ from ImageViewer import ImageViewer
 from Point2D import Point2D
 from plot_utils import (GRID, SCALE, W, H, PLOT_LEFT,
                         PLOT_RIGHT, PLOT_TOP, PLOT_BOTTOM, draw_ticks_and_labels,
-                        draw_grid, load_font)
-
-
-def cell_rect(cx: int, cy: int) -> list[int]:
-    """把栅格单元 (cx, cy) 映射成图像中的像素矩形 [left, top, right, bottom]。
-
-    Pillow 图像原点在左上、y 轴向下，而网格 y 轴向上，故按 (GRID - y) 翻转。
-    """
-    left = PLOT_LEFT + cx * SCALE
-    top = PLOT_BOTTOM - (cy + 1) * SCALE
-    right = PLOT_LEFT + (cx + 1) * SCALE
-    bottom = PLOT_BOTTOM - cy * SCALE
-    return [left, top, right, bottom]
+                        draw_grid, cell_rect, load_font)
 
 
 def point_to_image(p: Point2D) -> tuple[float, float]:
