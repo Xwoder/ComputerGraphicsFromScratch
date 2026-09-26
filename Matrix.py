@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import math
 from dataclasses import dataclass
 
@@ -45,7 +47,7 @@ class Matrix:
         return tuple(self.rows[index])
 
     @staticmethod
-    def identity() -> "Matrix":
+    def identity() -> Matrix:
         """单位矩阵：相机不旋转，看向 +z。"""
         return Matrix((
             (1, 0, 0),
@@ -54,7 +56,7 @@ class Matrix:
         ))
 
     @staticmethod
-    def rotation_x(theta: Number) -> "Matrix":
+    def rotation_x(theta: Number) -> Matrix:
         c, s = math.cos(theta), math.sin(theta)
         return Matrix((
             (1, 0, 0),
@@ -63,7 +65,7 @@ class Matrix:
         ))
 
     @staticmethod
-    def rotation_y(theta: Number) -> "Matrix":
+    def rotation_y(theta: Number) -> Matrix:
         c, s = math.cos(theta), math.sin(theta)
         return Matrix((
             (c, 0, s),
@@ -72,7 +74,7 @@ class Matrix:
         ))
 
     @staticmethod
-    def rotation_z(theta: Number) -> "Matrix":
+    def rotation_z(theta: Number) -> Matrix:
         c, s = math.cos(theta), math.sin(theta)
         return Matrix((
             (c, -s, 0),
@@ -81,7 +83,7 @@ class Matrix:
         ))
 
     @staticmethod
-    def rotation(euler: tuple[Number, Number, Number]) -> "Matrix":
+    def rotation(euler: tuple[Number, Number, Number]) -> Matrix:
         """
         由欧拉角（绕 X、Y、Z 轴的弧度）组合出旋转矩阵。
         组合顺序：先绕 X，再绕 Y，最后绕 Z（Rx · Ry · Rz）。
@@ -93,7 +95,7 @@ class Matrix:
             .multiply(Matrix.rotation_z(rz))
         )
 
-    def __matmul__(self, other: "Matrix") -> "Matrix":
+    def __matmul__(self, other: Matrix) -> Matrix:
         """矩阵乘法运算符（A @ B），通用维度，要求 A 列数 == B 行数。"""
         if self.column_count != other.row_count:
             raise ValueError(
@@ -111,9 +113,9 @@ class Matrix:
             for i in range(self.row_count)
         )
 
-        return Matrix(result)
+        return type(self)(result)
 
-    def multiply(self, other: "Matrix") -> "Matrix":
+    def multiply(self, other: Matrix) -> Matrix:
         """矩阵乘法（self · other），等价于 self @ other。"""
         return self @ other
 
