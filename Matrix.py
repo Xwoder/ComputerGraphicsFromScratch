@@ -47,38 +47,38 @@ class Matrix:
     @staticmethod
     def identity() -> "Matrix":
         """单位矩阵：相机不旋转，看向 +z。"""
-        return Matrix([
-            [1, 0, 0],
-            [0, 1, 0],
-            [0, 0, 1],
-        ])
+        return Matrix((
+            (1, 0, 0),
+            (0, 1, 0),
+            (0, 0, 1),
+        ))
 
     @staticmethod
     def rotation_x(theta: Number) -> "Matrix":
         c, s = math.cos(theta), math.sin(theta)
-        return Matrix([
-            [1, 0, 0],
-            [0, c, -s],
-            [0, s, c],
-        ])
+        return Matrix((
+            (1, 0, 0),
+            (0, c, -s),
+            (0, s, c),
+        ))
 
     @staticmethod
     def rotation_y(theta: Number) -> "Matrix":
         c, s = math.cos(theta), math.sin(theta)
-        return Matrix([
-            [c, 0, s],
-            [0, 1, 0],
-            [-s, 0, c],
-        ])
+        return Matrix((
+            (c, 0, s),
+            (0, 1, 0),
+            (-s, 0, c),
+        ))
 
     @staticmethod
     def rotation_z(theta: Number) -> "Matrix":
         c, s = math.cos(theta), math.sin(theta)
-        return Matrix([
-            [c, -s, 0],
-            [s, c, 0],
-            [0, 0, 1],
-        ])
+        return Matrix((
+            (c, -s, 0),
+            (s, c, 0),
+            (0, 0, 1),
+        ))
 
     @staticmethod
     def rotation(euler: tuple[Number, Number, Number]) -> "Matrix":
