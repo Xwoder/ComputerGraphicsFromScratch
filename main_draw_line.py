@@ -11,17 +11,14 @@
   5. 绘制结果同时保存为 graph_line_no_interpolation.png。
 """
 
-import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MultipleLocator
 
+from matplotlib_tools import configure_chinese_font
+from Point2 import Point2
+
 # 配置支持中文的字体，避免标题/图例中的中文显示为方块。
-# macOS 自带 PingFang SC，其余为常见中文回退字体。
-matplotlib.rcParams["font.sans-serif"] = [
-    "PingFang SC", "Hiragino Sans GB", "Arial Unicode MS", "DejaVu Sans",
-]
-matplotlib.rcParams["font.family"] = "sans-serif"
-matplotlib.rcParams["axes.unicode_minus"] = False  # 正常显示负号
+configure_chinese_font()
 
 
 def rasterize_line(k, intercept, x_start, x_end):
@@ -38,33 +35,36 @@ def rasterize_line(k, intercept, x_start, x_end):
 
 def main():
     GRID = 100
-    A = (0, 1)  # 三条直线的公共起始点 (0,1)
+    A = Point2(0, 1)  # 三条直线的公共起始点 (0,1)
 
-    # 要绘制的多条直线：(斜率k, 截距b, 颜色, 绘制终止列x_end, 图例名)
+    # 要绘制的多条直线：(终点 P1, 颜色, 图例名)
+    # 起点统一为 A=(0,1)，由 A 与 P1 反推斜率 k 与截距 b。
     LINES = [
-        (0.5, 1, "tab:red", 90, r"$y = \frac{1}{2}x + 1$"),
-        (1.0, 1, "tab:orange", 98, "y = x + 1"),
-        (3.0, 1, "tab:green", 32, "y = 3x + 1"),
+        (Point2(90, 46), "tab:red", r"$y = \frac{1}{2}x + 1$"),
+        (Point2(98, 99), "tab:orange", "y = x + 1"),
+        (Point2(32, 97), "tab:green", "y = 3x + 1"),
     ]
 
     print("=" * 60)
     print(f"起始点 A = {A}，各直线截距 b = 1（均过 (0,1)）")
-    for k, b, color, x_end, name in LINES:
-        print(f"  {name}： y = {k:.4f} * x + {b:.4f}")
     print("=" * 60)
 
     # 用 Matplotlib 绘制
     fig, ax = plt.subplots(figsize=(10, 10))
 
     # 逐条绘制：淡色“理想直线” + 栅格化点亮的栅格单元
-    for k, b, color, x_end, name in LINES:
+    for p1, color, name in LINES:
+        # 由 A 与 p1 反推斜截式 y = kx + b
+        k = (p1.y - A.y) / (p1.x - A.x)
+        b = A.y - k * A.x
+        x_end = p1.x
         # 理想直线（淡色连续，作为栅格化的参考）
-        ax.plot([0, x_end], [b, k * x_end + b],
+        ax.plot([A.x, p1.x], [A.y, p1.y],
                 color=color, lw=1.2, alpha=0.4, zorder=2,
                 label=f"{name}")
 
         # 栅格画法：每列只点亮一个最近的栅格单元（仅保留落在 100×100 内的）
-        cells = rasterize_line(k, b, A[0], x_end)
+        cells = rasterize_line(k, b, A.x, x_end)
         for x, y in cells:
             if 0 <= y < GRID:
                 ax.add_patch(plt.Rectangle((x, y), 1, 1,
