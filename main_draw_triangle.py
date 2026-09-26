@@ -148,7 +148,7 @@ def draw_wireframe_triangle(p0: Point2D, p1: Point2D, p2: Point2D):
     return cells
 
 
-def main(fill_color="red", wire_color="black", fill_alpha=0.55):
+def main(fill_color: Color = Color.RED, wire_color: Color = Color.BLACK, fill_alpha=0.55):
     # 三角形的三个顶点（栅格坐标；整数或浮点均可，draw_line 内部会吸附到最近单元）
     vertices = [Point2D(10, 10), Point2D(90, 40), Point2D(60, 90)]
 
@@ -169,10 +169,6 @@ def main(fill_color="red", wire_color="black", fill_alpha=0.55):
     for y, xl, xr in scanlines:
         fill_cells.update(Canvas2D.draw_line(Point2D(xl, y), Point2D(xr, y)))
 
-    # 把颜色名（如 "red" / "black"）转成 0~255 的 Color 对象
-    fill_color_obj = color_spec_to_color(fill_color)
-    wire_color_obj = color_spec_to_color(wire_color)
-
     # ───────────────────── 用 Pillow 渲染 ─────────────────────
     img = Image.new("RGBA", (W, H), (255, 255, 255, 255))
     draw = ImageDraw.Draw(img, "RGBA")
@@ -188,15 +184,15 @@ def main(fill_color="red", wire_color="black", fill_alpha=0.55):
     for c in fill_cells:
         x, y = int(c.x), int(c.y)
         if 0 <= x < GRID and 0 <= y < GRID:
-            col = (fill_color_obj.red, fill_color_obj.green,
-                   fill_color_obj.blue, int(255 * fill_alpha))
+            col = (fill_color.red, fill_color.green,
+                   fill_color.blue, int(255 * fill_alpha))
             ov.rectangle(cell_rect(x, y), fill=col)
     for c in wire_cells:
         x, y = int(c.x), int(c.y)
         if 0 <= x < GRID and 0 <= y < GRID:
             ov.rectangle(cell_rect(x, y),
-                         fill=(wire_color_obj.red, wire_color_obj.green,
-                               wire_color_obj.blue, 255))
+                         fill=(wire_color.red, wire_color.green,
+                               wire_color.blue, 255))
     img = Image.alpha_composite(img, overlay)
     draw = ImageDraw.Draw(img, "RGBA")
 
@@ -236,6 +232,6 @@ if __name__ == "__main__":
     # 可选：python main_draw_triangle.py [fill_color] [wire_color]
     # 例：python main_draw_triangle.py blue black
     args = sys.argv[1:]
-    fill = args[0] if len(args) >= 1 else "red"
-    wire = args[1] if len(args) >= 2 else "black"
+    fill = color_spec_to_color(args[0]) if len(args) >= 1 else Color.RED
+    wire = color_spec_to_color(args[1]) if len(args) >= 2 else Color.BLACK
     main(fill_color=fill, wire_color=wire)
