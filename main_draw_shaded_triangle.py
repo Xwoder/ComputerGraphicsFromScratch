@@ -17,14 +17,8 @@ from Canvas2D import Canvas2D
 from Color import Color
 from ImageViewer import ImageViewer
 from Point2D import Point2D
-from plot_utils import (GRID, SCALE, W, H, PLOT_LEFT,
-                        PLOT_RIGHT, PLOT_TOP, PLOT_BOTTOM, draw_ticks_and_labels,
-                        draw_grid, cell_rect, load_font)
-
-
-def point_to_image(p: Point2D) -> tuple[float, float]:
-    """把网格坐标点映射成图像坐标（用于绘制理想三角形与标签定位）。"""
-    return PLOT_LEFT + p.x * SCALE, PLOT_BOTTOM - p.y * SCALE
+from plot_utils import (GRID, W, H, draw_ticks_and_labels,
+                        draw_grid, cell_rect, point_to_image, load_font)
 
 
 def main() -> None:
