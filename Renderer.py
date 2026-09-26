@@ -1,7 +1,6 @@
 from Camera import Camera
 from Canvas import Canvas
 from Color import Color
-from Number import Number
 from Point3 import Point3
 from Ray import Ray
 from RayTracer import RayTracer
@@ -41,11 +40,6 @@ class Renderer:
         tracer = RayTracer(scene)
         viewport = self._viewport
 
-        # 整图共享的缩放因子：视口世界尺寸 / 画布像素尺寸。
-        # 预计算一次，避免每个像素重复做浮点除法。
-        scale_x: Number = viewport.width / canvas.width
-        scale_y: Number = viewport.height / canvas.height
-
         for y in range(canvas.height):
             for x in range(canvas.width):
                 target: Point3 = Camera.canvasToViewport(
@@ -53,8 +47,6 @@ class Renderer:
                     viewport,
                     x,
                     y,
-                    scaleX=scale_x,
-                    scaleY=scale_y,
                 )
 
                 ray: Ray = Ray(
