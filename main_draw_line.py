@@ -38,7 +38,7 @@ def point_to_image(p: Point2D) -> tuple[float, float]:
     return p.x * SCALE, (GRID - p.y) * SCALE
 
 
-def draw_grid(draw: ImageDraw.Draw,
+def draw_grid(draw: ImageDraw.ImageDraw,
               color: tuple[int, int, int, int] = (211, 211, 211, 255)) -> None:
     """在图像上画出 GRID×GRID 的栅格（淡灰线，每 SCALE 像素一条）。
 
