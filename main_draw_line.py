@@ -8,7 +8,7 @@
      再把 y 四舍五入到最近的栅格行——即每次只“点亮”一个栅格单元（最邻近栅格化）。
   4. 使用 Matplotlib 把被点亮的栅格单元（实心方格）画在 100×100 栅格上，
      并用淡色连续直线作为“理想直线”参考，便于对比栅格化误差。
-  5. 绘制结果同时保存为 output_line.png。
+  5. 绘制结果同时保存为 graph_line_no_interpolation.png。
 """
 
 import matplotlib
@@ -92,8 +92,8 @@ def main():
 
     plt.tight_layout()
     # 保存为 PNG 图片
-    fig.savefig("output_line.png", dpi=400)
-    print("已保存： output_line.png")
+    fig.savefig("graph_line_no_interpolation.png", dpi=400)
+    print("已保存： graph_line_no_interpolation.png")
     plt.show()
 
 
