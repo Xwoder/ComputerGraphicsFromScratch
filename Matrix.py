@@ -5,7 +5,7 @@ from Number import Number
 from Vec3 import Vec3
 
 
-@dataclass
+@dataclass(frozen=True)
 class Matrix:
     """
     3×3 矩阵，目前只用于相机的朝向（旋转）。
@@ -15,7 +15,34 @@ class Matrix:
     长度与夹角不变，因此变换后的射线方向无需再次归一化。
     """
 
-    m: list[list[Number]]
+    rows: tuple[tuple[Number, ...], ...]
+
+    def __post_init__(self):
+        if not self.rows:
+            raise ValueError("Matrix cannot be empty.")
+
+        column_count = len(self.rows[0])
+
+        if column_count == 0:
+            raise ValueError("Matrix cannot have empty rows.")
+
+        if any(len(row) != column_count for row in self.rows):
+            raise ValueError("All rows must have the same length.")
+
+        # 统一规整为不可变元组，匹配声明的 tuple[tuple[...]] 类型，
+        # 同时让 frozen 实例真正不可变、可哈希。
+        object.__setattr__(self, "rows", tuple(tuple(row) for row in self.rows))
+
+    @property
+    def row_count(self) -> int:
+        return len(self.rows)
+
+    @property
+    def column_count(self) -> int:
+        return len(self.rows[0])
+
+    def __getitem__(self, index: int) -> tuple[Number, ...]:
+        return tuple(self.rows[index])
 
     @staticmethod
     def identity() -> "Matrix":
@@ -66,20 +93,36 @@ class Matrix:
             .multiply(Matrix.rotation_z(rz))
         )
 
+    def __matmul__(self, other: "Matrix") -> "Matrix":
+        """矩阵乘法运算符（A @ B），通用维度，要求 A 列数 == B 行数。"""
+        if self.column_count != other.row_count:
+            raise ValueError(
+                "Matrix dimensions are incompatible for multiplication."
+            )
+
+        result = tuple(
+            tuple(
+                sum(
+                    self[i][k] * other[k][j]
+                    for k in range(self.column_count)
+                )
+                for j in range(other.column_count)
+            )
+            for i in range(self.row_count)
+        )
+
+        return Matrix(result)
+
     def multiply(self, other: "Matrix") -> "Matrix":
-        """矩阵乘法（self · other）。"""
-        a, b = self.m, other.m
-        return Matrix([[
-            a[i][0] * b[0][j] + a[i][1] * b[1][j] + a[i][2] * b[2][j]
-            for j in range(3)
-        ] for i in range(3)])
+        """矩阵乘法（self · other），等价于 self @ other。"""
+        return self @ other
 
     def transform(self, v: Vec3) -> Vec3:
         """
         把向量 v 当作列向量左乘本矩阵，返回变换后的向量
         （即 v 在世界坐标系下的表达）。
         """
-        m = self.m
+        m = self.rows
         return Vec3(
             x=m[0][0] * v.x + m[0][1] * v.y + m[0][2] * v.z,
             y=m[1][0] * v.x + m[1][1] * v.y + m[1][2] * v.z,
