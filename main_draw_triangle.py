@@ -10,19 +10,127 @@ DrawWireframeTriangle(P0, P1, P2, color)：依次用 DrawLine 连接三条边
   2. 每条边用 Canvas2D.draw_line 做对称插值栅格化，返回被点亮的栅格单元。
   3. 栅格化单元用黑色实心方格绘制在 N×N 栅格上（颜色按题目要求用黑色）；
      另用淡灰连续三角形作为“理想”参考，便于对比栅格化误差。
-  4. 绘制结果保存为 graph_triangle.png。
+  4. 绘制结果保存为 graph_triangle.png（使用 Pillow 渲染，不依赖 Matplotlib）。
 """
 
-import matplotlib.pyplot as plt
-from matplotlib.colors import to_rgba
-from matplotlib.ticker import MultipleLocator
+from typing import cast
 
-from matplotlib_tools import configure_chinese_font
+from PIL import Image, ImageDraw, ImageFont, ImageColor
+
 from Point2D import Point2D
 from Canvas2D import Canvas2D
+from Color import Color
+from ImageViewer import ImageViewer
 
-# 配置支持中文的字体，避免标题/图例中的中文显示为方块。
-configure_chinese_font()
+
+# ───────────────────────── 渲染参数 ─────────────────────────
+GRID = 100                 # 栅格边长（100×100 单元）
+SCALE = 12                 # 每个栅格单元对应的像素边长
+MARGIN_LEFT = 80           # 左侧留白（放 y 轴刻度标签）
+MARGIN_RIGHT = 50
+MARGIN_TOP = 90            # 顶部留白（放标题）
+MARGIN_BOTTOM = 80         # 底部留白（放 x 轴刻度标签 + 轴名）
+
+# 由 GRID / SCALE / 留白推导出的画布与绘图区尺寸
+PLOT_W = GRID * SCALE
+PLOT_H = GRID * SCALE
+W = MARGIN_LEFT + PLOT_W + MARGIN_RIGHT
+H = MARGIN_TOP + PLOT_H + MARGIN_BOTTOM
+PLOT_LEFT = MARGIN_LEFT
+PLOT_RIGHT = MARGIN_LEFT + PLOT_W
+PLOT_TOP = MARGIN_TOP
+PLOT_BOTTOM = MARGIN_TOP + PLOT_H    # 栅格 y=0 对应的图像 y（向下为正）
+
+
+def load_font(size: int) -> ImageFont.FreeTypeFont:
+    """加载支持中文的字体；若系统字体不可用则回退到默认字体。
+
+    macOS 自带 STHeiti / Arial Unicode 等中文字体，按顺序尝试。
+    """
+    candidates = [
+        "/System/Library/Fonts/STHeiti Light.ttc",
+        "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+        "/System/Library/Fonts/Supplemental/Songti.ttc",
+    ]
+    for path in candidates:
+        try:
+            return ImageFont.truetype(path, size)
+        except (OSError, IOError):
+            continue
+    # 回退：默认字体不是 FreeTypeFont，按类型转换以满足返回注解
+    return cast(ImageFont.FreeTypeFont, ImageFont.load_default())
+
+
+def color_spec_to_color(color_spec) -> Color:
+    """把颜色规格（如 "red"、#ff0000）转成 Color 对象（0~255）。
+
+    用 Pillow 的 ImageColor 解析，取代原先依赖 Matplotlib 的 to_rgba 版本，
+    使本脚本完全脱离 Matplotlib。
+    """
+    r, g, b = ImageColor.getrgb(color_spec)
+    return Color(r, g, b)
+
+
+def cell_rect(cx: int, cy: int) -> list[int]:
+    """把栅格单元 (cx, cy) 映射成图像中的像素矩形 [left, top, right, bottom]。
+
+    Pillow 图像原点在左上、y 轴向下，而网格 y 轴向上，故按 (GRID - y) 翻转。
+    """
+    left = PLOT_LEFT + cx * SCALE
+    top = PLOT_BOTTOM - (cy + 1) * SCALE
+    right = PLOT_LEFT + (cx + 1) * SCALE
+    bottom = PLOT_BOTTOM - cy * SCALE
+    return [left, top, right, bottom]
+
+
+def point_to_image(p: Point2D) -> tuple[float, float]:
+    """把网格坐标点映射成图像坐标（用于绘制理想三角形与标签定位）。"""
+    return PLOT_LEFT + p.x * SCALE, PLOT_BOTTOM - p.y * SCALE
+
+
+def draw_grid(draw: ImageDraw.ImageDraw) -> None:
+    """在绘图区画出 100×100 栅格：次刻度每 1 单元（浅灰）、主刻度每 10 单元（深灰）。"""
+    minor = (225, 225, 225, 255)
+    major = (160, 160, 160, 255)
+    for i in range(GRID + 1):
+        x = PLOT_LEFT + i * SCALE
+        y = PLOT_TOP + i * SCALE
+        # 竖线
+        draw.line([(x, PLOT_TOP), (x, PLOT_BOTTOM)],
+                  fill=major if i % 10 == 0 else minor, width=1)
+        # 横线
+        draw.line([(PLOT_LEFT, y), (PLOT_RIGHT, y)],
+                  fill=major if i % 10 == 0 else minor, width=1)
+
+
+def draw_ticks_and_labels(draw: ImageDraw.ImageDraw,
+                          font_tick: ImageFont.FreeTypeFont,
+                          font_axis: ImageFont.FreeTypeFont,
+                          font_title: ImageFont.FreeTypeFont) -> None:
+    """绘制坐标轴名（x / y）、主刻度标签（0,10,...,100）与标题。"""
+    tick_color = (60, 60, 60, 255)
+
+    # 主刻度标签：每 10 个单位
+    for i in range(0, GRID + 1, 10):
+        # x 轴刻度标签（位于绘图区下方）
+        tx = PLOT_LEFT + i * SCALE
+        draw.text((tx, PLOT_BOTTOM + 8), str(i),
+                  font=font_tick, fill=tick_color, anchor="ma")
+        # y 轴刻度标签（位于绘图区左侧）
+        ty = PLOT_BOTTOM - i * SCALE
+        draw.text((PLOT_LEFT - 10, ty), str(i),
+                  font=font_tick, fill=tick_color, anchor="rm")
+
+    # 轴名
+    draw.text((PLOT_RIGHT, PLOT_BOTTOM + 45), "x",
+              font=font_axis, fill=(0, 0, 0, 255), anchor="mm")
+    draw.text((PLOT_LEFT - 55, PLOT_TOP), "y",
+              font=font_axis, fill=(0, 0, 0, 255), anchor="mm")
+
+    # 标题（居中于顶部留白）
+    draw.text((W // 2, MARGIN_TOP // 2 + 10),
+              "三角形的线框栅格画法",
+              font=font_title, fill=(0, 0, 0, 255), anchor="mm")
 
 
 def draw_wireframe_triangle(p0: Point2D, p1: Point2D, p2: Point2D):
@@ -42,7 +150,6 @@ def draw_wireframe_triangle(p0: Point2D, p1: Point2D, p2: Point2D):
 
 
 def main(fill_color="red", wire_color="black", fill_alpha=0.55):
-    GRID = 100
     # 三角形的三个顶点（栅格坐标；整数或浮点均可，draw_line 内部会吸附到最近单元）
     vertices = [Point2D(10, 10), Point2D(90, 40), Point2D(60, 90)]
 
@@ -63,60 +170,65 @@ def main(fill_color="red", wire_color="black", fill_alpha=0.55):
     for y, xl, xr in scanlines:
         fill_cells.update(Canvas2D.draw_line(Point2D(xl, y), Point2D(xr, y)))
 
-    # 用 Matplotlib 绘制
-    fig, ax = plt.subplots(figsize=(10, 10))
+    # 把颜色名（如 "red" / "black"）转成 0~255 的 Color 对象
+    fill_color_obj = color_spec_to_color(fill_color)
+    wire_color_obj = color_spec_to_color(wire_color)
 
-    # 坐标轴与栅格（与第一、三象限正半轴对齐）：先定范围，便于后续换算标记尺寸
-    ax.set_xlim(0, GRID)
-    ax.set_ylim(0, GRID)
-    ax.set_aspect("equal", adjustable="box")
-    # 主刻度每 10 个单位（带坐标标签）
-    ax.set_xticks(range(0, GRID + 1, 10))
-    ax.set_yticks(range(0, GRID + 1, 10))
-    # 次刻度每 1 个单位 -> 画出真正的 100×100 栅格
-    ax.xaxis.set_minor_locator(MultipleLocator(1))
-    ax.yaxis.set_minor_locator(MultipleLocator(1))
-    ax.grid(True, which="major", color="gray", lw=0.8)
-    ax.grid(True, which="minor", color="lightgray", lw=0.25)
-    ax.set_xlabel("x")
-    ax.set_ylabel("y")
-    ax.set_title("三角形的线框栅格画法")
+    # ───────────────────── 用 Pillow 渲染 ─────────────────────
+    img = Image.new("RGBA", (W, H), (255, 255, 255, 255))
+    draw = ImageDraw.Draw(img, "RGBA")
 
-    # 理想三角形（淡灰连续，作为栅格化的参考，置于填充之上便于对比边界）
-    ax.plot([P0.x, P1.x, P2.x, P0.x],
-            [P0.y, P1.y, P2.y, P0.y],
-            color="gray", lw=1.2, alpha=0.6, zorder=3)
+    # 1) 栅格
+    draw_grid(draw)
 
-    # 用 Canvas2D 的帧缓冲 + PutPixel 逐格点亮像素点来绘制三角形。
-    # 栅格化（哪些格子该亮）仍由上面的 draw_line 逐行算出；这里用 PutPixel
-    # 把每个被点亮的栅格单元写入帧缓冲（颜色用 RGBA），再交给 imshow 渲染。
-    # 每个单元在数据坐标里是精确的 1×1，任意放大都不会出现间隙（区别于早期
-    # 用 ax.hlines 线宽固定点数、放大后露白缝的做法）。
-    canvas = Canvas2D(GRID, GRID)
+    # 2) 把栅格化结果（填充 + 线框）绘制到一张带透明通道的 overlay 上，
+    #    再用 alpha_composite 把它合成到主图——这样半透明的填充能透出底下的
+    #    栅格线，而黑色的线框保持不透明覆盖在填充之上。
+    overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    ov = ImageDraw.Draw(overlay, "RGBA")
     for c in fill_cells:
-        if 0 <= c.x < GRID and 0 <= c.y < GRID:
-            canvas.putPixel(c.x, c.y, to_rgba(fill_color, fill_alpha))   # 填充
+        x, y = int(c.x), int(c.y)
+        if 0 <= x < GRID and 0 <= y < GRID:
+            col = (fill_color_obj.red, fill_color_obj.green,
+                   fill_color_obj.blue, int(255 * fill_alpha))
+            ov.rectangle(cell_rect(x, y), fill=col)
     for c in wire_cells:
-        if 0 <= c.x < GRID and 0 <= c.y < GRID:
-            canvas.putPixel(c.x, c.y, to_rgba(wire_color, 1.0))          # 线框（覆盖填充）
-    ax.imshow(canvas.as_array(), origin="lower", extent=(0, GRID, 0, GRID),
-              interpolation="nearest", zorder=2)
+        x, y = int(c.x), int(c.y)
+        if 0 <= x < GRID and 0 <= y < GRID:
+            ov.rectangle(cell_rect(x, y),
+                         fill=(wire_color_obj.red, wire_color_obj.green,
+                               wire_color_obj.blue, 255))
+    img = Image.alpha_composite(img, overlay)
+    draw = ImageDraw.Draw(img, "RGBA")
 
-    # 三个顶点的文字标签。
-    # P0 是最低点，三角形内部在其上方，故把 P0 标签放到下方（外侧）；
-    # P1/P2 放在右上方，既避开黑色栅格单元又不压在三角形内部。
-    offsets = {"P0": (0, -2), "P1": (0, -2), "P2": (0, 1)}
+    # 3) 理想三角形（淡灰连续，作为栅格化的参考，置于填充之上便于对比边界）
+    outline = (120, 120, 120, 200)
+    for a_pt, b_pt in ((P0, P1), (P1, P2), (P2, P0)):
+        ax, ay = point_to_image(a_pt)
+        bx, by = point_to_image(b_pt)
+        draw.line([(ax, ay), (bx, by)], fill=outline, width=3)
+
+    # 4) 三个顶点的文字标签。
+    #    P0 是最低点，三角形内部在其上方，故把 P0 标签放到下方（外侧）；
+    #    P1/P2 放在上方，既避开黑色栅格单元又不压在三角形内部。
+    font_label = load_font(20)
+    min_y = min(P0.y, P1.y, P2.y)
+    offsets = {"P0": 22, "P1": -22, "P2": -22}
     for label, p in (("P0", P0), ("P1", P1), ("P2", P2)):
-        dx, dy = offsets[label]
-        ax.text(p.x + dx, p.y + dy, label,
-                fontsize=14, color="black", zorder=4)
+        ix, iy = point_to_image(p)
+        dy = offsets[label] if p.y > min_y + 1 else 22
+        draw.text((ix, iy + dy), label,
+                  font=font_label, fill=(0, 0, 0, 255), anchor="mm")
 
-    plt.tight_layout()
-    # 保存为 PNG 图片
+    # 5) 坐标轴、刻度标签与标题
+    draw_ticks_and_labels(draw, load_font(18), load_font(22), load_font(30))
+
     OUTPUT_PATH = "graph_triangle.png"
-    fig.savefig(OUTPUT_PATH, dpi=400)
+    img.save(OUTPUT_PATH)
     print(f"已保存： {OUTPUT_PATH}，填充 {len(fill_cells)} 个栅格单元，线框 {len(wire_cells)} 个")
-    plt.show()
+
+    # 保存后自动打开图片（按平台调用系统默认查看器）
+    ImageViewer.open_image(OUTPUT_PATH)
 
 
 if __name__ == "__main__":
@@ -124,6 +236,6 @@ if __name__ == "__main__":
     # 可选：python main_draw_triangle.py [fill_color] [wire_color]
     # 例：python main_draw_triangle.py blue black
     args = sys.argv[1:]
-    fill = args[0] if len(args) >= 1 else "blue"
+    fill = args[0] if len(args) >= 1 else "red"
     wire = args[1] if len(args) >= 2 else "black"
     main(fill_color=fill, wire_color=wire)
