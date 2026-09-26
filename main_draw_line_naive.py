@@ -9,7 +9,7 @@
   4. 使用 Pillow 把被点亮的栅格单元（实心方格）画在 100×100 栅格上，
      并用淡色连续直线作为“理想直线”参考，便于对比栅格化误差。
   5. 绘制结果同时保存为 graph_line_no_interpolation.png。
-  （刻度与坐标标注较复杂，此处先不绘制。）
+  （坐标轴、刻度与标题复用 plot_utils，与三角形脚本同一套布局。）
 """
 
 from PIL import Image, ImageDraw
@@ -19,39 +19,8 @@ from Color import Color
 from ImageViewer import ImageViewer
 from LineByTwoPoints import LineByTwoPoints
 from Point2D import Point2D
-
-
-# 每个栅格单元对应的像素边长
-SCALE = 10
-GRID = 100
-W, H = GRID * SCALE, GRID * SCALE
-
-
-def grid_to_image(x: int, y: int) -> tuple[int, int, int, int]:
-    """把栅格单元 (x, y) 映射成图像中的像素矩形 (left, top, right, bottom)。
-
-    Pillow 图像原点在左上、y 轴向下，而网格 y 轴向上，故按 (GRID - y - 1) 翻转。
-    """
-    left = x * SCALE
-    top = (GRID - y - 1) * SCALE
-    return left, top, left + SCALE, top + SCALE
-
-
-def point_to_image(p: Point2D) -> tuple[float, float]:
-    """把网格坐标点映射成图像坐标（用于绘制理想直线）。"""
-    return p.x * SCALE, (GRID - p.y) * SCALE
-
-
-def draw_grid(draw: ImageDraw.ImageDraw,
-              color: tuple[int, int, int, int] = (211, 211, 211, 255)) -> None:
-    """在图像上画出 GRID×GRID 的栅格（淡灰线，每 SCALE 像素一条）。
-
-    draw：已绑定到目标图像的 ImageDraw 对象；color：栅格线 RGBA 颜色。
-    """
-    for i in range(GRID + 1):
-        pos = i * SCALE
-        draw.line([(pos, 0), (pos, H)], fill=color, width=1)  # 竖线
-        draw.line([(0, pos), (W, pos)], fill=color, width=1)  # 横线
+from plot_utils import (GRID, W, H, cell_rect, point_to_image, draw_grid,
+                        draw_ticks_and_labels, load_font)
 
 
 def main():
@@ -95,10 +64,14 @@ def main():
         cells = Canvas2D.rasterize_line(k, b, x_start, x_end)
         for c in cells:
             if 0 <= c.y < GRID:
-                rect = grid_to_image(int(c.x), int(c.y))
+                rect = cell_rect(int(c.x), int(c.y))
                 draw.rectangle(rect,
                                fill=(line.color.red, line.color.green, line.color.blue,
                                      int(0.85 * 255)))
+
+    # 坐标轴、刻度标签与标题（复用三角形脚本同一套布局）
+    draw_ticks_and_labels(draw, load_font(18), load_font(22), load_font(30),
+                          title="直线的朴素栅格画法（按列最邻近）")
 
     # 保存为 PNG 图片
     OUTPUT_PATH = "graph_line_no_interpolation.png"

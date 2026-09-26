@@ -26,39 +26,8 @@ from Color import Color
 from ImageViewer import ImageViewer
 from LineByTwoPoints import LineByTwoPoints
 from Point2D import Point2D
-
-
-# 每个栅格单元对应的像素边长
-SCALE = 10
-GRID = 100
-W, H = GRID * SCALE, GRID * SCALE
-
-
-def grid_to_image(x: int, y: int) -> tuple[int, int, int, int]:
-    """把栅格单元 (x, y) 映射成图像中的像素矩形 (left, top, right, bottom)。
-
-    Pillow 图像原点在左上、y 轴向下，而网格 y 轴向上，故按 (GRID - y - 1) 翻转。
-    """
-    left = x * SCALE
-    top = (GRID - y - 1) * SCALE
-    return left, top, left + SCALE, top + SCALE
-
-
-def point_to_image(p: Point2D) -> tuple[float, float]:
-    """把网格坐标点映射成图像坐标（用于绘制理想直线）。"""
-    return p.x * SCALE, (GRID - p.y) * SCALE
-
-
-def draw_grid(draw: ImageDraw.ImageDraw,
-              color: tuple[int, int, int, int] = (211, 211, 211, 255)) -> None:
-    """在图像上画出 GRID×GRID 的栅格（淡灰线，每 SCALE 像素一条）。
-
-    draw：已绑定到目标图像的 ImageDraw 对象；color：栅格线 RGBA 颜色。
-    """
-    for i in range(GRID + 1):
-        pos = i * SCALE
-        draw.line([(pos, 0), (pos, H)], fill=color, width=1)  # 竖线
-        draw.line([(0, pos), (W, pos)], fill=color, width=1)  # 横线
+from plot_utils import (GRID, W, H, cell_rect, point_to_image, draw_grid,
+                        draw_ticks_and_labels, load_font)
 
 
 def main():
@@ -97,10 +66,14 @@ def main():
         print(f"  {line.name}：点亮 {len(cells)} 个栅格单元")
         for c in cells:
             if 0 <= c.x < GRID and 0 <= c.y < GRID:
-                rect = grid_to_image(int(c.x), int(c.y))
+                rect = cell_rect(int(c.x), int(c.y))
                 draw.rectangle(rect,
                                fill=(line.color.red, line.color.green, line.color.blue,
                                      int(0.85 * 255)))
+
+    # 坐标轴、刻度标签与标题（复用三角形脚本同一套布局）
+    draw_ticks_and_labels(draw, load_font(18), load_font(22), load_font(30),
+                          title="直线的插值栅格画法（DrawLine）")
 
     # 保存为 PNG 图片
     OUTPUT_PATH = "graph_line_with_interpolation.png"
