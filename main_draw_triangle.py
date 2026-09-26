@@ -17,19 +17,18 @@ from typing import cast
 
 from PIL import Image, ImageDraw, ImageFont, ImageColor
 
-from Point2D import Point2D
 from Canvas2D import Canvas2D
 from Color import Color
 from ImageViewer import ImageViewer
-
+from Point2D import Point2D
 
 # ───────────────────────── 渲染参数 ─────────────────────────
-GRID = 100                 # 栅格边长（100×100 单元）
-SCALE = 12                 # 每个栅格单元对应的像素边长
-MARGIN_LEFT = 80           # 左侧留白（放 y 轴刻度标签）
+GRID = 100  # 栅格边长（100×100 单元）
+SCALE = 12  # 每个栅格单元对应的像素边长
+MARGIN_LEFT = 80  # 左侧留白（放 y 轴刻度标签）
 MARGIN_RIGHT = 50
-MARGIN_TOP = 90            # 顶部留白（放标题）
-MARGIN_BOTTOM = 80         # 底部留白（放 x 轴刻度标签 + 轴名）
+MARGIN_TOP = 90  # 顶部留白（放标题）
+MARGIN_BOTTOM = 80  # 底部留白（放 x 轴刻度标签 + 轴名）
 
 # 由 GRID / SCALE / 留白推导出的画布与绘图区尺寸
 PLOT_W = GRID * SCALE
@@ -39,7 +38,7 @@ H = MARGIN_TOP + PLOT_H + MARGIN_BOTTOM
 PLOT_LEFT = MARGIN_LEFT
 PLOT_RIGHT = MARGIN_LEFT + PLOT_W
 PLOT_TOP = MARGIN_TOP
-PLOT_BOTTOM = MARGIN_TOP + PLOT_H    # 栅格 y=0 对应的图像 y（向下为正）
+PLOT_BOTTOM = MARGIN_TOP + PLOT_H  # 栅格 y=0 对应的图像 y（向下为正）
 
 
 def load_font(size: int) -> ImageFont.FreeTypeFont:
@@ -233,6 +232,7 @@ def main(fill_color="red", wire_color="black", fill_alpha=0.55):
 
 if __name__ == "__main__":
     import sys
+
     # 可选：python main_draw_triangle.py [fill_color] [wire_color]
     # 例：python main_draw_triangle.py blue black
     args = sys.argv[1:]
