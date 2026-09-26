@@ -33,8 +33,11 @@ def draw_wireframe_triangle(p0: Point2D, p1: Point2D, p2: Point2D):
     其中 color 仅影响“如何上色”，不影响栅格化结果，故在此不传入。
     """
     cells = set()
-    for a, b in ((p0, p1), (p1, p2), (p2, p0)):
-        cells.update(Canvas2D.draw_line(a, b))
+    pa: Point2D
+    pb: Point2D
+    for pa, pb in ((p0, p1), (p1, p2), (p2, p0)):
+        line: list[Point2D] = Canvas2D.draw_line(pa, pb)
+        cells.update(line)
     return cells
 
 

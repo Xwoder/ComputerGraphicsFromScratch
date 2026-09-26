@@ -63,7 +63,7 @@ class Canvas2D:
             x1, y1 = int(b.x), int(b.y)
             ys = Canvas2D.interpolate(x0, y0, x1, y1)
             for x in range(x0, x1 + 1):
-                cells.append(Point2D(x, int(round(ys[x - x0]))))
+                cells.append(Point2D(x, round(ys[x - x0])))
         else:
             # 偏竖直：确保 y 递增
             if a.y > b.y:
@@ -72,11 +72,11 @@ class Canvas2D:
             x1, y1 = int(b.x), int(b.y)
             xs = Canvas2D.interpolate(y0, x0, y1, x1)
             for y in range(y0, y1 + 1):
-                cells.append(Point2D(int(round(xs[y - y0])), y))
+                cells.append(Point2D(round(xs[y - y0]), y))
         return cells
 
     @staticmethod
-    def rasterize_line(k, intercept, x_start, x_end):
+    def rasterize_line(k, intercept, x_start, x_end) -> list[Point2D]:
         """朴素栅格化：x 每次递增 1，由 y = kx + b 得到浮点 y，
         再四舍五入到最近的栅格行，每个 x 只点亮一个栅格单元 (x, round(y))。
         作为 draw_line 的对照版本，用于演示无插值画法的失真。"""
@@ -84,7 +84,7 @@ class Canvas2D:
         x = x_start
         while x <= x_end:
             y = k * x + intercept
-            cells.append(Point2D(x, int(round(y))))  # 最邻近栅格化：每列只点亮一个单元
+            cells.append(Point2D(x, round(y)))  # 最邻近栅格化：每列只点亮一个单元
             x += 1
         return cells
 
@@ -134,8 +134,8 @@ class Canvas2D:
         # ❺ 逐条扫描线记录左右端点（四舍五入吸附到栅格列）
         rows: list[tuple[int, int, int]] = []
         for y in range(y0, y2 + 1):
-            xl = int(round(x_left[y - y0]))
-            xr = int(round(x_right[y - y0]))
+            xl = round(x_left[y - y0])
+            xr = round(x_right[y - y0])
             rows.append((y, xl, xr))
         return rows
 
@@ -174,8 +174,8 @@ class Canvas2D:
         栅格，越界则忽略。这是 3D Canvas.putPixel 的 2D 对应版本，使
         上层（如三角形绘制）可以逐格写入带颜色的像素。
         """
-        xi = int(round(x))
-        yi = int(round(y))
+        xi = round(x)
+        yi = round(y)
         if 0 <= xi < self.width and 0 <= yi < self.height:
             self.buffer[yi, xi] = color
 
