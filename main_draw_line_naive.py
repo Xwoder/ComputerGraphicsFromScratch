@@ -12,6 +12,7 @@
   （坐标轴、刻度与标题复用 plot_utils，与三角形脚本同一套布局。）
 """
 
+from pathlib import Path
 from PIL import Image, ImageDraw
 
 from Canvas2D import Canvas2D
@@ -74,7 +75,8 @@ def main():
                           title="直线的朴素栅格画法（按列最邻近）")
 
     # 保存为 PNG 图片
-    OUTPUT_PATH = "graph_line_no_interpolation.png"
+    OUTPUT_PATH = Path("output") / "graph_line_no_interpolation.png"
+    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     img.save(OUTPUT_PATH)
     print(f"已保存： {OUTPUT_PATH}")
 

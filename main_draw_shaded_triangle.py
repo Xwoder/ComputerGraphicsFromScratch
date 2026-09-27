@@ -11,6 +11,7 @@ DrawShadedTriangle(P0, P1, P2, color)：每个顶点带一个 h 着色系数（0
 绘制结果保存为 graph_shaded_triangle.png（使用 Pillow 渲染，不依赖 Matplotlib）。
 """
 
+from pathlib import Path
 from PIL import Image, ImageDraw
 
 from Canvas2D import Canvas2D
@@ -99,7 +100,8 @@ def main() -> None:
     draw_ticks_and_labels(draw, load_font(18), load_font(22), load_font(30),
                           title="三角形的插值着色（Shaded Triangle）")
 
-    OUTPUT_PATH = "graph_shaded_triangle.png"
+    OUTPUT_PATH = Path("output") / "graph_shaded_triangle.png"
+    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     img.save(OUTPUT_PATH)
     print(f"已保存： {OUTPUT_PATH}（基色 {base_color}，h0={h0}, h1={h1}, h2={h2}）")
 

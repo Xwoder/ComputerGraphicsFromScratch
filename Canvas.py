@@ -45,6 +45,9 @@ class Canvas:
             path (Path): 输出文件路径。
         """
 
+        # 确保输出文件所在的目录存在（如默认 output/ 文件夹）。
+        path.parent.mkdir(parents=True, exist_ok=True)
+
         # 逐行构造并写入：每行像素拼成单个字符串后立即写出，不缓存整图，
         # 把峰值内存从「整张图的大字符串」降到「单行」，对 480k 像素更友好。
         with open(path, "w", encoding="ascii") as f:

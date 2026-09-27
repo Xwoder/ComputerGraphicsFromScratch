@@ -19,6 +19,7 @@
   4. 绘制结果保存为 graph_line_with_interpolation.png。
 """
 
+from pathlib import Path
 from PIL import Image, ImageDraw
 
 from Canvas2D import Canvas2D
@@ -76,7 +77,8 @@ def main():
                           title="直线的插值栅格画法（DrawLine）")
 
     # 保存为 PNG 图片
-    OUTPUT_PATH = "graph_line_with_interpolation.png"
+    OUTPUT_PATH = Path("output") / "graph_line_with_interpolation.png"
+    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     img.save(OUTPUT_PATH)
     print(f"已保存： {OUTPUT_PATH}")
 

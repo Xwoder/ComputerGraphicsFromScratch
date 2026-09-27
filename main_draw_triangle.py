@@ -13,6 +13,7 @@ DrawWireframeTriangle(P0, P1, P2, color)：依次用 DrawLine 连接三条边
   4. 绘制结果保存为 graph_triangle.png（使用 Pillow 渲染，不依赖 Matplotlib）。
 """
 
+from pathlib import Path
 from PIL import Image, ImageDraw
 
 from Canvas2D import Canvas2D
@@ -115,7 +116,8 @@ def main() -> None:
     draw_ticks_and_labels(draw, load_font(18), load_font(22), load_font(30),
                           title="三角形的线框栅格画法")
 
-    OUTPUT_PATH = "graph_triangle.png"
+    OUTPUT_PATH = Path("output") / "graph_triangle.png"
+    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     img.save(OUTPUT_PATH)
     print(f"已保存： {OUTPUT_PATH}，填充 {len(fill_cells)} 个栅格单元，线框 {len(wire_cells)} 个")
 
