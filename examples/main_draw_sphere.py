@@ -5,10 +5,10 @@ from pathlib import Path
 from Camera import Camera
 from Canvas import Canvas
 from color.Color import Color
-from Light.AmbientLight import AmbientLight
-from Light.DirectionalLight import DirectionalLight
-from Light.Light import Light
-from Light.PointLight import PointLight
+from light.AmbientLight import AmbientLight
+from light.DirectionalLight import DirectionalLight
+from light.Light import Light
+from light.PointLight import PointLight
 from geometry.RotationMatrix import RotationMatrix
 from Number import Number
 from geometry.Point3 import Point3
