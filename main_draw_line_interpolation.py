@@ -72,7 +72,10 @@ def main():
                                fill=line.color.as_tuple())
 
     # 坐标轴、刻度标签与标题（复用三角形脚本同一套布局）
-    draw_ticks_and_labels(draw, load_font(18), load_font(22), load_font(30),
+    draw_ticks_and_labels(draw,
+                          font_tick=load_font(18),
+                          font_axis=load_font(22),
+                          font_title=load_font(30),
                           title="直线的插值栅格画法（DrawLine）")
 
     # 保存为 PNG 图片
