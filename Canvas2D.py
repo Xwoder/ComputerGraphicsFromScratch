@@ -69,7 +69,7 @@ class Canvas2D:
                 a, b = b, a
             x0, y0 = int(a.x), int(a.y)
             x1, y1 = int(b.x), int(b.y)
-            ys = Canvas2D.interpolate(x0, y0, x1, y1)
+            ys = Canvas2D.interpolate(start_index=x0, start_value=y0, end_index=x1, end_value=y1)
             for x in range(x0, x1 + 1):
                 point = Point2(x, round(ys[x - x0]))
                 cells.append(point)
@@ -79,7 +79,7 @@ class Canvas2D:
                 a, b = b, a
             x0, y0 = int(a.x), int(a.y)
             x1, y1 = int(b.x), int(b.y)
-            xs = Canvas2D.interpolate(y0, x0, y1, x1)
+            xs = Canvas2D.interpolate(start_index=y0, start_value=x0, end_index=y1, end_value=x1)
             for y in range(y0, y1 + 1):
                 point = Point2(round(xs[y - y0]), y)
                 cells.append(point)
@@ -126,9 +126,9 @@ class Canvas2D:
         x2, y2 = int(c.x), int(c.y)
 
         # ❷ 沿 y 插值每条边的 x 坐标（interpolate(i0, d0, i1, d1)：i 取 y，d 取 x）
-        x01: list[float] = Canvas2D.interpolate(y0, x0, y1, x1)
-        x12: list[float] = Canvas2D.interpolate(y1, x1, y2, x2)
-        x02: list[float] = Canvas2D.interpolate(y0, x0, y2, x2)
+        x01: list[float] = Canvas2D.interpolate(start_index=y0, start_value=x0, end_index=y1, end_value=x1)
+        x12: list[float] = Canvas2D.interpolate(start_index=y1, start_value=x1, end_index=y2, end_value=x2)
+        x02: list[float] = Canvas2D.interpolate(start_index=y0, start_value=x0, end_index=y2, end_value=x2)
 
         # ❸ 去掉 x01 末项（y1 处与 x12 首项重复），拼接两条短边
         x01.pop()
@@ -212,12 +212,12 @@ class Canvas2D:
         h0, h1, h2 = hs
 
         # ❷ 沿 y 插值三条边的 x 与 h
-        x01 = Canvas2D.interpolate(y0, x0, y1, x1)
-        h01 = Canvas2D.interpolate(y0, h0, y1, h1)
-        x12 = Canvas2D.interpolate(y1, x1, y2, x2)
-        h12 = Canvas2D.interpolate(y1, h1, y2, h2)
-        x02 = Canvas2D.interpolate(y0, x0, y2, x2)
-        h02 = Canvas2D.interpolate(y0, h0, y2, h2)
+        x01 = Canvas2D.interpolate(start_index=y0, start_value=x0, end_index=y1, end_value=x1)
+        h01 = Canvas2D.interpolate(start_index=y0, start_value=h0, end_index=y1, end_value=h1)
+        x12 = Canvas2D.interpolate(start_index=y1, start_value=x1, end_index=y2, end_value=x2)
+        h12 = Canvas2D.interpolate(start_index=y1, start_value=h1, end_index=y2, end_value=h2)
+        x02 = Canvas2D.interpolate(start_index=y0, start_value=x0, end_index=y2, end_value=x2)
+        h02 = Canvas2D.interpolate(start_index=y0, start_value=h0, end_index=y2, end_value=h2)
 
         # ❸ 去掉两条短边的末项再拼接，避免 y1 行重复；取中点判定左 / 右边界
         x01.pop()
@@ -237,7 +237,10 @@ class Canvas2D:
         for y in range(y0, y2 + 1):
             x_l = round(x_left[y - y0])
             x_r = round(x_right[y - y0])
-            h_segment = Canvas2D.interpolate(x_l, h_left[y - y0], x_r, h_right[y - y0])
+            h_segment = Canvas2D.interpolate(start_index=x_l,
+                                             start_value=h_left[y - y0],
+                                             end_index=x_r,
+                                             end_value=h_right[y - y0])
             for x in range(x_l, x_r + 1):
                 h = h_segment[x - x_l]
                 shaded = color * h  # Color.__mul__ 已做 0~255 钳制
