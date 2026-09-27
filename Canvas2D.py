@@ -34,9 +34,9 @@ class Canvas2D:
         """
         if i0 == i1:
             return [float(d0)]
-        values: list[float] = []
-        a: float = (d1 - d0) / (i1 - i0)  # 每步增量
-        d: float = d0
+        values: list[Number] = []
+        a: Number = (d1 - d0) / (i1 - i0)  # 每步增量
+        d: Number = d0
         for i in range(i0, i1 + 1):
             values.append(d)
             d = d + a
