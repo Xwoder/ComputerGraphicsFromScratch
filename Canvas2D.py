@@ -167,9 +167,9 @@ class Canvas2D:
                              p1: Point2D,
                              p2: Point2D,
                              color: Color,
-                             h0: float,
-                             h1: float,
-                             h2: float,
+                             h0: Number,
+                             h1: Number,
+                             h2: Number,
                              skip: "set[tuple[int, int]] | None" = None) -> None:
         """带插值着色的三角形（Shaded Triangle）。
 
