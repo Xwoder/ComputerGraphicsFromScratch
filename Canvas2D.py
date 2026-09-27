@@ -19,27 +19,28 @@ class Canvas2D:
     """2D 直线栅格化原语集合（无状态，全部为静态方法）。"""
 
     @staticmethod
-    def interpolate(i0: int,
-                    d0: Number,
-                    i1: int,
-                    d1: Number) -> list[float]:
-        """沿 i 从 i0 到 i1 每步 +1，线性插值出对应的 d，返回浮点列表。
+    def interpolate(start_index: int,
+                    start_value: Number,
+                    end_index: int,
+                    end_value: Number) -> list[float]:
+        """沿索引从 start_index 到 end_index 每步 +1，线性插值出对应的数值，返回浮点列表。
 
-        i0 / i1 是插值用的整数索引（直接喂给 range）；d0 / d1 是被插值的
-        数值，可以是 int（如坐标 x）也可以是 float（如 draw_shaded_triangle
-        里的着色系数 h），故标注为 Number。
+        start_index / end_index 是插值用的整数索引（直接喂给 range）；start_value /
+        end_value 是被插值的数值，可以是 int（如坐标 x）也可以是 float（如
+        draw_shaded_triangle 里的着色系数 h），故标注为 Number。
 
-        返回长度 = |i1 - i0| + 1，列表第 k 个值对应 i = i0 + k。
-        当 i0 == i1 时退化为仅含 d0 的单元素列表。
+        返回长度 = |end_index - start_index| + 1，列表第 k 个值对应
+        index = start_index + k。
+        当 start_index == end_index 时退化为仅含 start_value 的单元素列表。
         """
-        if i0 == i1:
-            return [float(d0)]
+        if start_index == end_index:
+            return [float(start_value)]
         values: list[Number] = []
-        a: Number = (d1 - d0) / (i1 - i0)  # 每步增量
-        d: Number = d0
-        for i in range(i0, i1 + 1):
-            values.append(d)
-            d = d + a
+        value_increment: Number = (end_value - start_value) / (end_index - start_index)  # 每步增量
+        current_value: Number = start_value
+        for i in range(start_index, end_index + 1):
+            values.append(current_value)
+            current_value = current_value + value_increment
         return values
 
     @staticmethod
