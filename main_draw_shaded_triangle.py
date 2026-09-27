@@ -62,8 +62,9 @@ def main() -> None:
     )
 
     # ───────────────────── 用 Pillow 渲染 ─────────────────────
-    img = Image.new("RGBA", (W, H), (255, 255, 255, 255))
-    draw = ImageDraw.Draw(img, "RGBA")
+    # 这里不需要透明度，故用 RGB（而非 RGBA）模式，颜色均为 3 元组。
+    img = Image.new("RGB", (W, H), (255, 255, 255))
+    draw = ImageDraw.Draw(img, "RGB")
 
     # 1) 栅格
     draw_grid(draw)
@@ -76,11 +77,11 @@ def main() -> None:
             if not mask[y, x]:
                 continue
             r, g, b = arr[y, x]
-            col = (int(r * 255), int(g * 255), int(b * 255), 255)
+            col = (int(r * 255), int(g * 255), int(b * 255))
             draw.rectangle(cell_rect(x, y), fill=col)
 
     # 3) 理想三角形（淡灰连续，作为栅格化的参考，置于着色之上便于对比边界）
-    outline = (120, 120, 120, 200)
+    outline = (120, 120, 120)
     for a_pt, b_pt in ((P0, P1), (P1, P2), (P2, P0)):
         ax, ay = point_to_image(a_pt)
         bx, by = point_to_image(b_pt)
@@ -95,7 +96,7 @@ def main() -> None:
         ix, iy = point_to_image(p)
         dy = 22 if p.y <= min_y + 1 else -22
         draw.text((ix, iy + dy), f"{label}\nh={h:.1f}",
-                  font=font_label, fill=(0, 0, 0, 255), anchor="mm")
+                  font=font_label, fill=(0, 0, 0), anchor="mm")
 
     # 5) 坐标轴、刻度标签与标题
     draw_ticks_and_labels(draw, load_font(18), load_font(22), load_font(30),
