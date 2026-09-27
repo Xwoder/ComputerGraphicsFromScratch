@@ -19,6 +19,9 @@ class Color:
     RED: ClassVar["Color"]
     GREEN: ClassVar["Color"]
     BLUE: ClassVar["Color"]
+    YELLOW: ClassVar["Color"]
+    PURPLE: ClassVar["Color"]
+    CYAN: ClassVar["Color"]
 
     def __mul__(self, number: Number) -> Color:
         return Color(
@@ -44,3 +47,6 @@ Color.WHITE = Color(255, 255, 255)
 Color.RED = Color(255, 0, 0)
 Color.GREEN = Color(0, 255, 0)
 Color.BLUE = Color(0, 0, 255)
+Color.YELLOW = Color(255, 255, 0)
+Color.PURPLE = Color(128, 0, 128)
+Color.CYAN = Color(0, 255, 255)
