@@ -5,7 +5,6 @@ from Canvas import Canvas
 from geometry.Matrix import Matrix
 from geometry.Point2 import Point2
 from geometry.Point3 import Point3
-from geometry.Vec3 import Vec3
 from Viewport import Viewport
 
 
@@ -94,20 +93,21 @@ class Camera:
     def projectVertex(
             canvas: Canvas,
             viewport: Viewport,
-            vertex: Vec3,
+            vertex: Point3,
     ) -> Point2:
         """
-        透视投影：把相机空间下的 3D 顶点投影到画布像素坐标。
+        透视投影：把相机空间下的 3D 顶点（位置点）投影到画布像素坐标。
 
-        先将相机空间顶点 v 透视除 z，投到距离相机 d（viewport.distance）的视口平面，
-        得到视口坐标 (v.x * d / v.z, v.y * d / v.z)，再由 ViewportToCanvas 换算成
-        画布像素坐标。对应 Gabriel Gambetta《Computer Graphics from Scratch》的
+        参数 vertex 是相机空间下的一个空间位置（Point3）；先将其透视除 z，
+        投到距离相机 d（viewport.distance）的视口平面，得到视口坐标
+        (vertex.x * d / vertex.z, vertex.y * d / vertex.z)，再由 ViewportToCanvas
+        换算成画布像素坐标。对应 Gabriel Gambetta《Computer Graphics from Scratch》的
         ProjectVertex；此处 d 取 viewport.distance，并以静态方法显式传入 canvas/viewport。
 
         Args:
             canvas (Canvas): 当前画布，提供像素尺寸。
             viewport (Viewport): 视口，提供世界尺寸与到相机的距离 d。
-            vertex (Vec3): 相机空间下的 3D 顶点。
+            vertex (Point3): 相机空间下的 3D 顶点（空间位置）。
 
         Returns:
             Point2: 投影后的画布像素坐标（可能为小数，交给 putPixel 前按需 round）。
