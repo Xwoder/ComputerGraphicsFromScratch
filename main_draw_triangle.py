@@ -14,6 +14,7 @@ DrawWireframeTriangle(P0, P1, P2, color)：依次用 DrawLine 连接三条边
 """
 
 from pathlib import Path
+
 from PIL import Image, ImageDraw
 
 from Canvas2D import Canvas2D
