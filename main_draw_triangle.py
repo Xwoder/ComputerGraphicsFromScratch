@@ -123,7 +123,7 @@ def main() -> None:
     print(f"已保存： {OUTPUT_PATH}，填充 {len(fill_cells)} 个栅格单元，线框 {len(wire_cells)} 个")
 
     # 保存后自动打开图片（按平台调用系统默认查看器）
-    ImageViewer.open_image(OUTPUT_PATH)
+    ImageViewer.open_image(OUTPUT_PATH.as_posix())
 
 
 if __name__ == "__main__":
