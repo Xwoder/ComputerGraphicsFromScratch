@@ -1,7 +1,7 @@
 import math
 from dataclasses import dataclass, field
 
-from Color import Color
+from color.Color import Color
 from Interval import Interval
 from Light.Light import Light
 from Number import Number

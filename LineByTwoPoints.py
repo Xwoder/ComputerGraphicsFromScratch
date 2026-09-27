@@ -14,7 +14,7 @@
 
 from dataclasses import dataclass
 
-from Color import Color
+from color.Color import Color
 from geometry.Point2 import Point2
 
 

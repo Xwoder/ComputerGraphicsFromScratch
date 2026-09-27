@@ -4,7 +4,7 @@ from pathlib import Path
 
 from Camera import Camera
 from Canvas import Canvas
-from Color import Color
+from color.Color import Color
 from Light.AmbientLight import AmbientLight
 from Light.DirectionalLight import DirectionalLight
 from Light.Light import Light

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from Color import Color
+from color.Color import Color
 
 
 class Canvas:

@@ -1,7 +1,7 @@
 import math
 from dataclasses import dataclass, field
 
-from Color import Color
+from color.Color import Color
 from Number import Number
 from geometry.Point3 import Point3
 from Ray import Ray

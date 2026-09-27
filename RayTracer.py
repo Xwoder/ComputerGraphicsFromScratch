@@ -1,6 +1,6 @@
 import math
 
-from Color import Color
+from color.Color import Color
 from Interval import Interval
 from Light.AmbientLight import AmbientLight
 from Light.DirectionalLight import DirectionalLight

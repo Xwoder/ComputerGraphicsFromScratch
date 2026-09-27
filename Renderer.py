@@ -1,6 +1,6 @@
 from Camera import Camera
 from Canvas import Canvas
-from Color import Color
+from color.Color import Color
 from geometry.Point3 import Point3
 from Ray import Ray
 from RayTracer import RayTracer

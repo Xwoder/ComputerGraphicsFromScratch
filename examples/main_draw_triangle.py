@@ -18,7 +18,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 from Canvas2D import Canvas2D
-from Color import Color
+from color.Color import Color
 from ImageViewer import ImageViewer
 from geometry.Point2 import Point2
 from plot_utils import (GRID, W, H, draw_ticks_and_labels,

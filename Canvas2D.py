@@ -10,7 +10,7 @@ Canvas2D 只承载「直线栅格化」这类 2D 绘制算法，不持有像素�
 
 import numpy as np
 
-from Color import Color
+from color.Color import Color
 from Number import Number
 from geometry.Point2 import Point2
 
