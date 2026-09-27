@@ -19,7 +19,8 @@ class Canvas2D:
     """2D 直线栅格化原语集合（无状态，全部为静态方法）。"""
 
     @staticmethod
-    def interpolate(start_index: int,
+    def interpolate(*,
+                    start_index: int,
                     start_value: Number,
                     end_index: int,
                     end_value: Number) -> list[float]:
