@@ -83,10 +83,10 @@ def main() -> None:
 
     # 5) 坐标轴、刻度标签与标题
     draw_ticks_and_labels(draw,
+                          title="三角形的插值着色（Shaded Triangle）",
                           font_tick=load_font(18),
                           font_axis=load_font(22),
-                          font_title=load_font(30),
-                          title="三角形的插值着色（Shaded Triangle）")
+                          font_title=load_font(30))
 
     OUTPUT_PATH = Path("output") / "graph_shaded_triangle.png"
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)

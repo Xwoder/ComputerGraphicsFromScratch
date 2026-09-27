@@ -71,10 +71,10 @@ def main():
 
     # 坐标轴、刻度标签与标题（复用三角形脚本同一套布局）
     draw_ticks_and_labels(draw,
+                          title="直线的朴素栅格画法（按列最邻近）",
                           font_tick=load_font(18),
                           font_axis=load_font(22),
-                          font_title=load_font(30),
-                          title="直线的朴素栅格画法（按列最邻近）")
+                          font_title=load_font(30))
 
     # 保存为 PNG 图片
     OUTPUT_PATH = Path("output") / "graph_line_no_interpolation.png"
