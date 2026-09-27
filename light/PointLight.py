@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from Light.Light import Light
+from light.Light import Light
 from geometry.Point3 import Point3
 from geometry.Vec3 import Vec3
 

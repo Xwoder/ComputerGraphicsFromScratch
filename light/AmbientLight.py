@@ -1,4 +1,4 @@
-from Light.Light import Light
+from light.Light import Light
 
 
 class AmbientLight(Light):
