@@ -36,29 +36,12 @@ def main() -> None:
 
     canvas = Canvas2D(GRID, GRID)
 
-    # 用 lines 数组描述所有线段：每一项是一个 (start, end) 二元组。
-    # 显式保存每条线的起点，这样即便后续各线段起点不再相同（不再是共点扇形），
-    # 也无需改动这里的结构。
-    lines: list[tuple[Point2D, Point2D]] = [
-        (P0, P1),
-        (P1, P2),
-        (P2, P0),
-    ]
-
-    # 先画出三条边的线框（边框像素写入缓冲），随后填充时通过 skip 跳过这些
-    # 边框单元，使内部着色不会覆盖原本的边框线（而非事后重绘覆盖）。
-    wire_cells: set[tuple[int, int]] = set()
-    for start, end in lines:
-        for c in Canvas2D.draw_line(start, end):
-            wx, wy = int(c.x), int(c.y)
-            wire_cells.add((wx, wy))
-            canvas.putPixel(wx, wy, Color.BLACK)
-
+    # 直接填充着色三角形；skip 参数已移除，内部着色会覆盖到边缘，
+    # 三角形边界由下方叠加的淡灰理想轮廓作为参考显示。
     canvas.draw_shaded_triangle(
         P0, P1, P2,
         color=base_color,
         h0=h0, h1=h1, h2=h2,
-        skip=wire_cells,
     )
 
     # ───────────────────── 用 Pillow 渲染 ─────────────────────
