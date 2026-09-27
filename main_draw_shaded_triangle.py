@@ -17,7 +17,7 @@ from PIL import Image, ImageDraw
 from Canvas2D import Canvas2D
 from Color import Color
 from ImageViewer import ImageViewer
-from Point2D import Point2D
+from Point2 import Point2
 from plot_utils import (GRID, W, H, draw_ticks_and_labels,
                         draw_grid, cell_rect, point_to_image, load_font)
 
@@ -30,9 +30,9 @@ def main() -> None:
     h2: float = 0.4
     # 新的三角形顶点（栅格坐标），与线框示例 (10,10)/(90,40)/(60,90) 不同：
     #   顶点顺序与下面的 h 一一对应（draw_shaded_triangle 内部会按 y 排序）。
-    P0 = Point2D(15, 20)
-    P1 = Point2D(85, 30)
-    P2 = Point2D(50, 90)
+    P0 = Point2(15, 20)
+    P1 = Point2(85, 30)
+    P2 = Point2(50, 90)
 
     canvas = Canvas2D(GRID, GRID)
 

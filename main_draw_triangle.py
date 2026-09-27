@@ -20,14 +20,14 @@ from PIL import Image, ImageDraw
 from Canvas2D import Canvas2D
 from Color import Color
 from ImageViewer import ImageViewer
-from Point2D import Point2D
+from Point2 import Point2
 from plot_utils import (GRID, W, H, draw_ticks_and_labels,
                         draw_grid, cell_rect, point_to_image, load_font)
 
 
-def draw_wireframe_triangle(p0: Point2D,
-                            p1: Point2D,
-                            p2: Point2D):
+def draw_wireframe_triangle(p0: Point2,
+                            p1: Point2,
+                            p2: Point2):
     """线框三角形：连接 (P0,P1)、(P1,P2)、(P2,P0) 三条边。
 
     返回三条边被点亮的栅格单元集合（去重），供上层决定绘制颜色。
@@ -35,10 +35,10 @@ def draw_wireframe_triangle(p0: Point2D,
     其中 color 仅影响“如何上色”，不影响栅格化结果，故在此不传入。
     """
     cells = set()
-    pa: Point2D
-    pb: Point2D
+    pa: Point2
+    pb: Point2
     for pa, pb in ((p0, p1), (p1, p2), (p2, p0)):
-        line: list[Point2D] = Canvas2D.draw_line(pa, pb)
+        line: list[Point2] = Canvas2D.draw_line(pa, pb)
         cells.update(line)
     return cells
 
@@ -49,7 +49,7 @@ def main() -> None:
     wire_color = Color.BLACK
 
     # 三角形的三个顶点（栅格坐标；整数或浮点均可，draw_line 内部会吸附到最近单元）
-    vertices = [Point2D(10, 10), Point2D(90, 40), Point2D(60, 90)]
+    vertices = [Point2(10, 10), Point2(90, 40), Point2(60, 90)]
 
     # 比较三个点的 Y 轴坐标，按升序排列：
     #   位置最低（Y 最小） -> P0
@@ -66,8 +66,8 @@ def main() -> None:
     scanlines = Canvas2D.fill_triangle_scanlines(P0, P1, P2)
     fill_cells = set()
     for y, xl, xr in scanlines:
-        line: list[Point2D] = Canvas2D.draw_line(Point2D(xl, y),
-                                                 Point2D(xr, y))
+        line: list[Point2] = Canvas2D.draw_line(Point2(xl, y),
+                                                 Point2(xr, y))
         fill_cells.update(line)
 
     # ───────────────────── 用 Pillow 渲染 ─────────────────────

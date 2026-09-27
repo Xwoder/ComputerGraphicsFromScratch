@@ -8,7 +8,7 @@ from typing import cast
 
 from PIL import ImageDraw, ImageFont
 
-from Point2D import Point2D
+from Point2 import Point2
 
 # ───────────────────────── 渲染参数 ─────────────────────────
 GRID = 100  # 栅格边长（100×100 单元）
@@ -56,7 +56,7 @@ def cell_rect(cx: int, cy: int) -> list[int]:
     return [left, top, right, bottom]
 
 
-def point_to_image(p: Point2D) -> tuple[float, float]:
+def point_to_image(p: Point2) -> tuple[float, float]:
     """把网格坐标点映射成图像坐标（用于绘制理想三角形与标签定位）。"""
     return PLOT_LEFT + p.x * SCALE, PLOT_BOTTOM - p.y * SCALE
 
