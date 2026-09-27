@@ -274,7 +274,7 @@ class Canvas2D:
         xi = round(x)
         yi = round(y)
         if 0 <= xi < self.width and 0 <= yi < self.height:
-            self.buffer[yi, xi] = (color.red, color.green, color.blue)
+            self.buffer[yi, xi] = color.as_tuple()
             self.lit[yi, xi] = True
 
     def as_array(self):

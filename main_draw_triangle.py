@@ -86,15 +86,13 @@ def main() -> None:
     for c in fill_cells:
         x, y = int(c.x), int(c.y)
         if 0 <= x < GRID and 0 <= y < GRID:
-            col = (fill_color.red, fill_color.green,
-                   fill_color.blue, int(255 * fill_alpha))
+            col = (*fill_color.as_tuple(), int(255 * fill_alpha))
             ov.rectangle(cell_rect(x, y), fill=col)
     for c in wire_cells:
         x, y = int(c.x), int(c.y)
         if 0 <= x < GRID and 0 <= y < GRID:
             ov.rectangle(cell_rect(x, y),
-                         fill=(wire_color.red, wire_color.green,
-                               wire_color.blue, 255))
+                         fill=(*wire_color.as_tuple(), 255))
     img = Image.alpha_composite(img, overlay)
     draw = ImageDraw.Draw(img, "RGBA")
 

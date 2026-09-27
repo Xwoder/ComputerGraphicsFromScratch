@@ -59,7 +59,7 @@ def main():
         ax0, ay0 = point_to_image(line.start)
         ax1, ay1 = point_to_image(line.end)
         draw.line([(ax0, ay0), (ax1, ay1)],
-                  fill=(line.color.red, line.color.green, line.color.blue, int(0.4 * 255)),
+                  fill=(*line.color.as_tuple(), int(0.4 * 255)),
                   width=2)
 
         # 插值栅格化：沿主轴每步点亮一个最近的栅格单元（仅保留落在 100×100 内）
@@ -69,7 +69,7 @@ def main():
             if 0 <= c.x < GRID and 0 <= c.y < GRID:
                 rect = cell_rect(int(c.x), int(c.y))
                 draw.rectangle(rect,
-                               fill=(line.color.red, line.color.green, line.color.blue,
+                               fill=(*line.color.as_tuple(),
                                      int(0.85 * 255)))
 
     # 坐标轴、刻度标签与标题（复用三角形脚本同一套布局）

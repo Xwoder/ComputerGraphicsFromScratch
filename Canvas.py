@@ -58,5 +58,5 @@ class Canvas:
                 row = []
                 for x in range(self._width):
                     color = self._pixels[y][x]
-                    row.append(f"{color.red} {color.green} {color.blue}")
+                    row.append(" ".join(map(str, color.as_tuple())))
                 f.write(" ".join(row) + "\n")

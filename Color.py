@@ -34,6 +34,10 @@ class Color:
             min(self.blue + other.blue, 255),
         )
 
+    def as_tuple(self) -> tuple[int, int, int]:
+        """返回 (red, green, blue) 元组，方便传给需要元组颜色的接口（如 Pillow）。"""
+        return (self.red, self.green, self.blue)
+
 
 Color.BLACK = Color(0, 0, 0)
 Color.WHITE = Color(255, 255, 255)
