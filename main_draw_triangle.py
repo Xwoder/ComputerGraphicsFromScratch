@@ -44,10 +44,9 @@ def draw_wireframe_triangle(p0: Point2D,
 
 
 def main() -> None:
-    # 颜色与透明度（固定写死，不通过命令行参数配置）
+    # 颜色（固定写死，不通过命令行参数配置）
     fill_color = Color.RED
     wire_color = Color.BLACK
-    fill_alpha = 0.55
 
     # 三角形的三个顶点（栅格坐标；整数或浮点均可，draw_line 内部会吸附到最近单元）
     vertices = [Point2D(10, 10), Point2D(90, 40), Point2D(60, 90)]
@@ -78,15 +77,14 @@ def main() -> None:
     # 1) 栅格
     draw_grid(draw)
 
-    # 2) 把栅格化结果（填充 + 线框）绘制到一张带透明通道的 overlay 上，
-    #    再用 alpha_composite 把它合成到主图——这样半透明的填充能透出底下的
-    #    栅格线，而黑色的线框保持不透明覆盖在填充之上。
+    # 2) 把栅格化结果（填充 + 线框）绘制到 overlay 上，再用 alpha_composite
+    #    合成到主图；填充与线框均不透明，会覆盖底下的栅格线。
     overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     ov = ImageDraw.Draw(overlay, "RGBA")
     for c in fill_cells:
         x, y = int(c.x), int(c.y)
         if 0 <= x < GRID and 0 <= y < GRID:
-            col = (*fill_color.as_tuple(), int(255 * fill_alpha))
+            col = fill_color.as_tuple()
             ov.rectangle(cell_rect(x, y), fill=col)
     for c in wire_cells:
         x, y = int(c.x), int(c.y)
@@ -97,7 +95,7 @@ def main() -> None:
     draw = ImageDraw.Draw(img, "RGBA")
 
     # 3) 理想三角形（淡灰连续，作为栅格化的参考，置于填充之上便于对比边界）
-    outline = (120, 120, 120, 200)
+    outline = (120, 120, 120)
     for a_pt, b_pt in ((P0, P1), (P1, P2), (P2, P0)):
         ax, ay = point_to_image(a_pt)
         bx, by = point_to_image(b_pt)
