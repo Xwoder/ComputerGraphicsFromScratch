@@ -10,7 +10,6 @@ from PIL import ImageDraw, ImageFont
 
 from Point2D import Point2D
 
-
 # ───────────────────────── 渲染参数 ─────────────────────────
 GRID = 100  # 栅格边长（100×100 单元）
 SCALE = 12  # 每个栅格单元对应的像素边长
@@ -63,6 +62,7 @@ def point_to_image(p: Point2D) -> tuple[float, float]:
 
 
 def draw_ticks_and_labels(draw,
+                          *,
                           font_tick,
                           font_axis,
                           font_title,
