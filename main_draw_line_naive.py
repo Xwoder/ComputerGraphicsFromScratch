@@ -41,9 +41,9 @@ def main():
     print(f"起始点 {startPoint}，各直线截距 b = 1")
     print("=" * 60)
 
-    # 白色背景的 RGBA 画布
-    img = Image.new("RGBA", (W, H), (255, 255, 255, 255))
-    draw = ImageDraw.Draw(img, "RGBA")
+    # 白色背景的 RGB 画布（不需要透明度）
+    img = Image.new("RGB", (W, H), (255, 255, 255))
+    draw = ImageDraw.Draw(img)
 
     # 先画 100×100 栅格（淡灰线）
     draw_grid(draw)
@@ -58,7 +58,7 @@ def main():
         ax0, ay0 = point_to_image(line.start)
         ax1, ay1 = point_to_image(line.end)
         draw.line([(ax0, ay0), (ax1, ay1)],
-                  fill=(*line.color.as_tuple(), int(0.4 * 255)),
+                  fill=line.color.as_tuple(),
                   width=2)
 
         # 栅格画法：每列只点亮一个最近的栅格单元（仅保留落在 100×100 内的）
@@ -67,8 +67,7 @@ def main():
             if 0 <= c.y < GRID:
                 rect = cell_rect(int(c.x), int(c.y))
                 draw.rectangle(rect,
-                               fill=(*line.color.as_tuple(),
-                                     int(0.85 * 255)))
+                               fill=line.color.as_tuple())
 
     # 坐标轴、刻度标签与标题（复用三角形脚本同一套布局）
     draw_ticks_and_labels(draw, load_font(18), load_font(22), load_font(30),
