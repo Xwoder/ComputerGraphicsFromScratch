@@ -7,9 +7,9 @@ Canvas2D 只承载「直线栅格化」这类 2D 绘制算法，不持有像素�
 
 算法参考 Gabriel Gambetta《Computer Graphics from Scratch》。
 """
-from typing import Any
 
 import numpy as np
+
 from Color import Color
 from Number import Number
 from Point2D import Point2D
@@ -60,6 +60,7 @@ class Canvas2D:
         a: Point2D = Point2D(round(p0.x), round(p0.y))
         b: Point2D = Point2D(round(p1.x), round(p1.y))
 
+        point: Point2D
         if abs(b.x - a.x) > abs(b.y - a.y):
             # 偏水平：确保 x 递增
             if a.x > b.x:
@@ -68,7 +69,8 @@ class Canvas2D:
             x1, y1 = int(b.x), int(b.y)
             ys = Canvas2D.interpolate(x0, y0, x1, y1)
             for x in range(x0, x1 + 1):
-                cells.append(Point2D(x, round(ys[x - x0])))
+                point = Point2D(x, round(ys[x - x0]))
+                cells.append(point)
         else:
             # 偏竖直：确保 y 递增
             if a.y > b.y:
@@ -77,7 +79,8 @@ class Canvas2D:
             x1, y1 = int(b.x), int(b.y)
             xs = Canvas2D.interpolate(y0, x0, y1, x1)
             for y in range(y0, y1 + 1):
-                cells.append(Point2D(round(xs[y - y0]), y))
+                point = Point2D(round(xs[y - y0]), y)
+                cells.append(point)
         return cells
 
     @staticmethod
@@ -241,7 +244,7 @@ class Canvas2D:
                 if skip is not None and (x, y) in skip:
                     continue
                 h = h_segment[x - x_l]
-                shaded = color * h          # Color.__mul__ 已做 0~255 钳制
+                shaded = color * h  # Color.__mul__ 已做 0~255 钳制
                 self.putPixel(x, y, (shaded.red / 255.0,
                                      shaded.green / 255.0,
                                      shaded.blue / 255.0,
