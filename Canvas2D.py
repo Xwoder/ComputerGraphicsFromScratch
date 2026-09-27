@@ -170,7 +170,6 @@ class Canvas2D:
                              h0: float,
                              h1: float,
                              h2: float,
-                             alpha: float = 1.0,
                              skip: "set[tuple[int, int]] | None" = None) -> None:
         """带插值着色的三角形（Shaded Triangle）。
 
@@ -247,38 +246,47 @@ class Canvas2D:
                 shaded = color * h  # Color.__mul__ 已做 0~255 钳制
                 self.putPixel(x, y, (shaded.red / 255.0,
                                      shaded.green / 255.0,
-                                     shaded.blue / 255.0,
-                                     alpha))
+                                     shaded.blue / 255.0))
 
     def __init__(self, width: int, height: int,
-                 background: tuple[float, float, float, float] = (0.0, 0.0, 0.0, 0.0)):
-        """创建一个 width×height 的 2D 帧缓冲（RGBA 浮点数组）。
+                 background: tuple[float, float, float] = (0.0, 0.0, 0.0)):
+        """创建一个 width×height 的 2D 帧缓冲（RGB 浮点数组）。
 
         与 3D 的 Canvas 不同，这里仅持有一个像素缓冲，不负责 PPM 输出
         （那是 3D Canvas 的职责）；渲染交给上层（如 matplotlib.imshow）。
+        另持有一个 lit 布尔掩码，记录哪些栅格单元被写入过，供上层区分
+        “空白”与“被画成黑色”的单元（与颜色无关，并非透明度）。
         """
         self.width = width
         self.height = height
-        self.buffer = np.zeros((height, width, 4), dtype=float)
+        self.buffer = np.zeros((height, width, 3), dtype=float)
         self.buffer[:] = background
+        self.lit = np.zeros((height, width), dtype=bool)
 
     def putPixel(self, x: float, y: float,
-                 color: tuple[float, float, float, float]) -> None:
+                 color: tuple[float, float, float]) -> None:
         """在帧缓冲 (x, y) 处点亮一个颜色为 color 的栅格单元。
 
-        color 为 (r, g, b, a)（各分量 0~1）；坐标先 round 吸附到最近整数
-        栅格，越界则忽略。这是 3D Canvas.putPixel 的 2D 对应版本，使
+        color 为 (r, g, b)（各分量 0~1）；坐标先 round 吸附到最近整数
+        栅格，越界则忽略。写入时同时将该单元标记为 lit（已点亮）。
+        这是 3D Canvas.putPixel 的 2D 对应版本，使
         上层（如三角形绘制）可以逐格写入带颜色的像素。
         """
         xi = round(x)
         yi = round(y)
         if 0 <= xi < self.width and 0 <= yi < self.height:
             self.buffer[yi, xi] = color
+            self.lit[yi, xi] = True
 
-    def Clear(self, background: tuple[float, float, float, float] = (0.0, 0.0, 0.0, 0.0)) -> None:
-        """把整个帧缓冲重置为 background。"""
+    def Clear(self, background: tuple[float, float, float] = (0.0, 0.0, 0.0)) -> None:
+        """把整个帧缓冲重置为 background，并清空 lit 掩码。"""
         self.buffer[:] = background
+        self.lit[:] = False
 
     def as_array(self):
-        """返回 RGBA 帧缓冲（shape=(height, width, 4)），供 imshow 等渲染。"""
+        """返回 RGB 帧缓冲（shape=(height, width, 3)），供 imshow 等渲染。"""
         return self.buffer
+
+    def lit_mask(self):
+        """返回 lit 布尔掩码（shape=(height, width)），True 表示该单元被写入过。"""
+        return self.lit
