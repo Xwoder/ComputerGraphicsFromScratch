@@ -244,9 +244,7 @@ class Canvas2D:
                     continue
                 h = h_segment[x - x_l]
                 shaded = color * h  # Color.__mul__ 已做 0~255 钳制
-                self.putPixel(x, y, (shaded.red / 255.0,
-                                     shaded.green / 255.0,
-                                     shaded.blue / 255.0))
+                self.putPixel(x, y, shaded)
 
     def __init__(self, width: int, height: int,
                  background: tuple[float, float, float] = (0.0, 0.0, 0.0)):
@@ -264,22 +262,23 @@ class Canvas2D:
         self.lit = np.zeros((height, width), dtype=bool)
 
     def putPixel(self, x: float, y: float,
-                 color: tuple[float, float, float]) -> None:
+                 color: Color) -> None:
         """在帧缓冲 (x, y) 处点亮一个颜色为 color 的栅格单元。
 
-        color 为 (r, g, b)（各分量 0~1）；坐标先 round 吸附到最近整数
-        栅格，越界则忽略。写入时同时将该单元标记为 lit（已点亮）。
-        这是 3D Canvas.putPixel 的 2D 对应版本，使
-        上层（如三角形绘制）可以逐格写入带颜色的像素。
+        color 为 Color（各分量 0~255），原样写入缓冲区（缓冲区同样以
+        0~255 表示，与 Color 一致，避免无谓的 /255 与 *255 往返）。
+        坐标先 round 吸附到最近整数栅格，越界则忽略；写入时同时将该单元
+        标记为 lit（已点亮）。这是 3D Canvas.putPixel 的 2D 对应版本，使
+        上层（如三角形绘制）可以直接用 Color 逐格写像素。
         """
         xi = round(x)
         yi = round(y)
         if 0 <= xi < self.width and 0 <= yi < self.height:
-            self.buffer[yi, xi] = color
+            self.buffer[yi, xi] = (color.red, color.green, color.blue)
             self.lit[yi, xi] = True
 
     def as_array(self):
-        """返回 RGB 帧缓冲（shape=(height, width, 3)），供 imshow 等渲染。"""
+        """返回 RGB 帧缓冲（shape=(height, width, 3)，各分量 0~255），供 Pillow / imshow 等渲染。"""
         return self.buffer
 
     def lit_mask(self):

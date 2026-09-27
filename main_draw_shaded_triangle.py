@@ -52,7 +52,7 @@ def main() -> None:
         for c in Canvas2D.draw_line(start, end):
             wx, wy = int(c.x), int(c.y)
             wire_cells.add((wx, wy))
-            canvas.putPixel(wx, wy, (0.0, 0.0, 0.0))
+            canvas.putPixel(wx, wy, Color.BLACK)
 
     canvas.draw_shaded_triangle(
         P0, P1, P2,
@@ -70,14 +70,14 @@ def main() -> None:
     draw_grid(draw)
 
     # 2) 把 Canvas2D 帧缓冲逐格绘制（线框 + 着色三角形）
-    arr = canvas.as_array()  # shape=(height, width, 3)，行索引 = 栅格 y
+    arr = canvas.as_array()  # shape=(height, width, 3)，分量 0~255，行索引 = 栅格 y
     mask = canvas.lit_mask()  # 标记哪些单元被写入过（替代原 alpha 的“空/有”判断）
     for y in range(GRID):
         for x in range(GRID):
             if not mask[y, x]:
                 continue
             r, g, b = arr[y, x]
-            col = (int(r * 255), int(g * 255), int(b * 255))
+            col = (int(r), int(g), int(b))
             draw.rectangle(cell_rect(x, y), fill=col)
 
     # 3) 理想三角形（淡灰连续，作为栅格化的参考，置于着色之上便于对比边界）
@@ -108,7 +108,7 @@ def main() -> None:
     print(f"已保存： {OUTPUT_PATH}（基色 {base_color}，h0={h0}, h1={h1}, h2={h2}）")
 
     # 保存后自动打开图片（按平台调用系统默认查看器）
-    ImageViewer.open_image(OUTPUT_PATH)
+    ImageViewer.open_image(str(OUTPUT_PATH))
 
 
 if __name__ == "__main__":
