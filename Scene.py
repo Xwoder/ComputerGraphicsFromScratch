@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 
 from color.Color import Color
 from Interval import Interval
-from Light.Light import Light
+from light.Light import Light
 from Number import Number
 from Ray import Ray
 from Sphere import Sphere
