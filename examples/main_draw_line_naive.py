@@ -20,7 +20,7 @@ from Canvas2D import Canvas2D
 from Color import Color
 from ImageViewer import ImageViewer
 from LineByTwoPoints import LineByTwoPoints
-from Point2 import Point2
+from geometry.Point2 import Point2
 from plot_utils import (GRID, W, H, cell_rect, point_to_image, draw_grid,
                         draw_ticks_and_labels, load_font)
 
@@ -78,7 +78,7 @@ def main():
                           font_title=load_font(30))
 
     # 保存为 PNG 图片
-    OUTPUT_PATH = Path("output") / "graph_line_no_interpolation.png"
+    OUTPUT_PATH = Path("../output") / "graph_line_no_interpolation.png"
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     img.save(OUTPUT_PATH)
     print(f"已保存： {OUTPUT_PATH}")

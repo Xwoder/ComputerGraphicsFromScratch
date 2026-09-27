@@ -12,7 +12,7 @@ import numpy as np
 
 from Color import Color
 from Number import Number
-from Point2 import Point2
+from geometry.Point2 import Point2
 
 
 class Canvas2D:

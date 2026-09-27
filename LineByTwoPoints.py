@@ -15,7 +15,7 @@
 from dataclasses import dataclass
 
 from Color import Color
-from Point2 import Point2
+from geometry.Point2 import Point2
 
 
 @dataclass(frozen=True)

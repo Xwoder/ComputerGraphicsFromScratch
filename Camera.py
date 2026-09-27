@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 
 from Canvas import Canvas
 from Matrix import Matrix
-from Point3 import Point3
+from geometry.Point3 import Point3
 from Viewport import Viewport
 
 

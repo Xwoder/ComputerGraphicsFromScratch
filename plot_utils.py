@@ -8,7 +8,7 @@ from typing import cast
 
 from PIL import ImageDraw, ImageFont
 
-from Point2 import Point2
+from geometry.Point2 import Point2
 
 # ───────────────────────── 渲染参数 ─────────────────────────
 GRID = 100  # 栅格边长（100×100 单元）

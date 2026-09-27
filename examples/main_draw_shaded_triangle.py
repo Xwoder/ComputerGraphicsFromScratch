@@ -17,7 +17,7 @@ from PIL import Image, ImageDraw
 from Canvas2D import Canvas2D
 from Color import Color
 from ImageViewer import ImageViewer
-from Point2 import Point2
+from geometry.Point2 import Point2
 from plot_utils import (GRID, W, H, draw_ticks_and_labels,
                         draw_grid, cell_rect, point_to_image, load_font)
 
@@ -88,7 +88,7 @@ def main() -> None:
                           font_axis=load_font(22),
                           font_title=load_font(30))
 
-    OUTPUT_PATH = Path("output") / "graph_shaded_triangle.png"
+    OUTPUT_PATH = Path("../output") / "graph_shaded_triangle.png"
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     img.save(OUTPUT_PATH)
     print(f"已保存： {OUTPUT_PATH}（基色 {base_color}，h0={h0}, h1={h1}, h2={h2}）")

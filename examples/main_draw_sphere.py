@@ -11,7 +11,7 @@ from Light.Light import Light
 from Light.PointLight import PointLight
 from RotationMatrix import RotationMatrix
 from Number import Number
-from Point3 import Point3
+from geometry.Point3 import Point3
 from Renderer import Renderer
 from Scene import Scene
 from Sphere import Sphere
@@ -60,6 +60,6 @@ if __name__ == '__main__':
     renderer: Renderer = Renderer(scene, canvas, camera, viewport)
     renderer.render()
 
-    OUTPUT_PATH: Path = Path("output") / "graph_sphere.ppm"
+    OUTPUT_PATH: Path = Path("../output") / "graph_sphere.ppm"
     canvas.savePPM(OUTPUT_PATH)
     print(f"saved: {OUTPUT_PATH}")

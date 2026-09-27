@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 
 from Color import Color
 from Number import Number
-from Point3 import Point3
+from geometry.Point3 import Point3
 from Ray import Ray
 
 

@@ -6,7 +6,7 @@ from Light.AmbientLight import AmbientLight
 from Light.DirectionalLight import DirectionalLight
 from Light.PointLight import PointLight
 from Number import Number
-from Point3 import Point3
+from geometry.Point3 import Point3
 from Ray import Ray
 from Scene import Scene
 from Vec3 import Vec3
