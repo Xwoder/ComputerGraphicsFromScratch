@@ -13,6 +13,7 @@
 """
 
 from pathlib import Path
+
 from PIL import Image, ImageDraw
 
 from Canvas2D import Canvas2D
