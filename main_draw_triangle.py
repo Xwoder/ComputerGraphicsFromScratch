@@ -25,7 +25,9 @@ from plot_utils import (GRID, W, H, draw_ticks_and_labels,
                         draw_grid, cell_rect, point_to_image, load_font)
 
 
-def draw_wireframe_triangle(p0: Point2D, p1: Point2D, p2: Point2D):
+def draw_wireframe_triangle(p0: Point2D,
+                            p1: Point2D,
+                            p2: Point2D):
     """线框三角形：连接 (P0,P1)、(P1,P2)、(P2,P0) 三条边。
 
     返回三条边被点亮的栅格单元集合（去重），供上层决定绘制颜色。
@@ -65,7 +67,9 @@ def main() -> None:
     scanlines = Canvas2D.fill_triangle_scanlines(P0, P1, P2)
     fill_cells = set()
     for y, xl, xr in scanlines:
-        fill_cells.update(Canvas2D.draw_line(Point2D(xl, y), Point2D(xr, y)))
+        line: list[Point2D] = Canvas2D.draw_line(Point2D(xl, y),
+                                                 Point2D(xr, y))
+        fill_cells.update(line)
 
     # ───────────────────── 用 Pillow 渲染 ─────────────────────
     img = Image.new("RGBA", (W, H), (255, 255, 255, 255))
