@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import overload
 
 from Number import Number
-from Vec3 import Vec3
+from geometry.Vec3 import Vec3
 
 
 @dataclass(frozen=True)

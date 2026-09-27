@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
-from Matrix import Matrix
+from geometry.Matrix import Matrix
 from Number import Number
 
 

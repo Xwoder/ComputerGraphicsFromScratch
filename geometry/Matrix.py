@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import TypeVar
 
 from Number import Number
-from Vec3 import Vec3
+from geometry.Vec3 import Vec3
 
 # 绑定到 Matrix 的类型变量：让 __matmul__ 在子类上调用时，
 # 返回类型能正确推断为子类自身（如 RotationMatrix @ RotationMatrix -> RotationMatrix）。
