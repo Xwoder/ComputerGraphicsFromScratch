@@ -71,28 +71,23 @@ def main() -> None:
         fill_cells.update(line)
 
     # ───────────────────── 用 Pillow 渲染 ─────────────────────
-    img = Image.new("RGBA", (W, H), (255, 255, 255, 255))
-    draw = ImageDraw.Draw(img, "RGBA")
+    img = Image.new("RGB", (W, H), (255, 255, 255))
+    draw = ImageDraw.Draw(img)
 
     # 1) 栅格
     draw_grid(draw)
 
-    # 2) 把栅格化结果（填充 + 线框）绘制到 overlay 上，再用 alpha_composite
-    #    合成到主图；填充与线框均不透明，会覆盖底下的栅格线。
-    overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    ov = ImageDraw.Draw(overlay, "RGBA")
+    # 2) 栅格化结果（填充 + 线框）直接画在主图上；填充与线框均不透明，
+    #    会覆盖底下的栅格线（已无半透明，故无需 overlay + alpha_composite）。
     for c in fill_cells:
         x, y = int(c.x), int(c.y)
         if 0 <= x < GRID and 0 <= y < GRID:
-            col = fill_color.as_tuple()
-            ov.rectangle(cell_rect(x, y), fill=col)
+            draw.rectangle(cell_rect(x, y), fill=fill_color.as_tuple())
     for c in wire_cells:
         x, y = int(c.x), int(c.y)
         if 0 <= x < GRID and 0 <= y < GRID:
-            ov.rectangle(cell_rect(x, y),
-                         fill=(*wire_color.as_tuple(), 255))
-    img = Image.alpha_composite(img, overlay)
-    draw = ImageDraw.Draw(img, "RGBA")
+            draw.rectangle(cell_rect(x, y),
+                           fill=wire_color.as_tuple())
 
     # 3) 理想三角形（淡灰连续，作为栅格化的参考，置于填充之上便于对比边界）
     outline = (120, 120, 120)
