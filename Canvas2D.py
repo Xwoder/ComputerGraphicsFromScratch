@@ -278,11 +278,6 @@ class Canvas2D:
             self.buffer[yi, xi] = color
             self.lit[yi, xi] = True
 
-    def Clear(self, background: tuple[float, float, float] = (0.0, 0.0, 0.0)) -> None:
-        """把整个帧缓冲重置为 background，并清空 lit 掩码。"""
-        self.buffer[:] = background
-        self.lit[:] = False
-
     def as_array(self):
         """返回 RGB 帧缓冲（shape=(height, width, 3)），供 imshow 等渲染。"""
         return self.buffer
