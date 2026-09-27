@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from Number import Number
 from geometry.Point3 import Point3
-from Vec3 import Vec3
+from geometry.Vec3 import Vec3
 
 
 @dataclass

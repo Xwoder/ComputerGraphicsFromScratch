@@ -9,13 +9,13 @@ from Light.AmbientLight import AmbientLight
 from Light.DirectionalLight import DirectionalLight
 from Light.Light import Light
 from Light.PointLight import PointLight
-from RotationMatrix import RotationMatrix
+from geometry.RotationMatrix import RotationMatrix
 from Number import Number
 from geometry.Point3 import Point3
 from Renderer import Renderer
 from Scene import Scene
 from Sphere import Sphere
-from Vec3 import Vec3
+from geometry.Vec3 import Vec3
 from Viewport import Viewport
 
 if __name__ == '__main__':

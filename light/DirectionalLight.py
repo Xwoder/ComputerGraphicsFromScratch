@@ -3,7 +3,7 @@ from typing import override
 
 from Light.Light import Light
 from geometry.Point3 import Point3
-from Vec3 import Vec3
+from geometry.Vec3 import Vec3
 
 
 @dataclass

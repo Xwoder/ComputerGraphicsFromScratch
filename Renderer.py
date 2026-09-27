@@ -5,7 +5,7 @@ from geometry.Point3 import Point3
 from Ray import Ray
 from RayTracer import RayTracer
 from Scene import Scene
-from Vec3 import Vec3
+from geometry.Vec3 import Vec3
 from Viewport import Viewport
 
 

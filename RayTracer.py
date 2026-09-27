@@ -9,7 +9,7 @@ from Number import Number
 from geometry.Point3 import Point3
 from Ray import Ray
 from Scene import Scene
-from Vec3 import Vec3
+from geometry.Vec3 import Vec3
 
 # 着色点自交规避偏移：反射/阴影射线起点沿方向偏移该值，避免命中着色点自身。
 SHADOW_EPSILON: Number = 0.001
