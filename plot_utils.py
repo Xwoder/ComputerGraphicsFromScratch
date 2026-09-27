@@ -100,10 +100,11 @@ def draw_ticks_and_labels(draw,
 # macOS 自带中文字体候选（按顺序尝试）。注意 STHeiti Medium 正确扩展名为 .ttc，
 # 旧代码里曾误写成 ".ttc.ttc" 导致该候选失效；此处已修正并合并两脚本的候选。
 _FONT_CANDIDATES = [
+    "/System/Library/Fonts/Supplemental/Songti.ttc",
     "/System/Library/Fonts/STHeiti Light.ttc",
     "/System/Library/Fonts/STHeiti Medium.ttc",
     "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
-    "/System/Library/Fonts/Supplemental/Songti.ttc",
+
 ]
 
 
