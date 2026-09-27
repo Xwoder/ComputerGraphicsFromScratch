@@ -85,7 +85,7 @@ def main():
     print(f"已保存： {OUTPUT_PATH}")
 
     # 保存后自动打开图片（按平台调用系统默认查看器）
-    ImageViewer.open_image(OUTPUT_PATH)
+    ImageViewer.open_image(OUTPUT_PATH.as_posix())
 
 
 if __name__ == "__main__":
