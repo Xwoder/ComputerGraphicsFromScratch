@@ -170,7 +170,7 @@ class Canvas2D:
                              h0: Number,
                              h1: Number,
                              h2: Number,
-                             skip: "set[tuple[int, int]] | None" = None) -> None:
+                             skip: set[tuple[int, int]] | None = None) -> None:
         """带插值着色的三角形（Shaded Triangle）。
 
         对应 Gabriel Gambetta《Computer Graphics from Scratch》中的
