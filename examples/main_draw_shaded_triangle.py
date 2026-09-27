@@ -18,8 +18,8 @@ from Canvas2D import Canvas2D
 from color.Color import Color
 from ImageViewer import ImageViewer
 from geometry.Point2 import Point2
-from plot_utils import (GRID, W, H, draw_ticks_and_labels,
-                        draw_grid, cell_rect, point_to_image, load_font)
+from PlotUtils import (GRID, W, H, draw_ticks_and_labels,
+                       draw_grid, cell_rect, point_to_image, load_font)
 
 
 def main() -> None:

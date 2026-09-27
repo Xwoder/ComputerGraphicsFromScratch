@@ -21,8 +21,8 @@ from color.Color import Color
 from ImageViewer import ImageViewer
 from LineByTwoPoints import LineByTwoPoints
 from geometry.Point2 import Point2
-from plot_utils import (GRID, W, H, cell_rect, point_to_image, draw_grid,
-                        draw_ticks_and_labels, load_font)
+from PlotUtils import (GRID, W, H, cell_rect, point_to_image, draw_grid,
+                       draw_ticks_and_labels, load_font)
 
 
 def main():
