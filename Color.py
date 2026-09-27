@@ -22,9 +22,9 @@ class Color:
 
     def __mul__(self, number: Number) -> Color:
         return Color(
-            max(0, min(int(self.red * number), 255)),
-            max(0, min(int(self.green * number), 255)),
-            max(0, min(int(self.blue * number), 255)),
+            max(0, min(round(self.red * number), 255)),
+            max(0, min(round(self.green * number), 255)),
+            max(0, min(round(self.blue * number), 255)),
         )
 
     def __add__(self, other: Color) -> Color:
