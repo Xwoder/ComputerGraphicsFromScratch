@@ -101,7 +101,7 @@ class Rasterizer:
         # 投影每个变换后的顶点（ApplyTransform + ProjectVertex）
         projected: list[Point2] = []
         for vertex in model.vertices:
-            transformed: Point3 = instance.applyTransform(vertex)  # V' = ApplyTransform(V, instance.transform)
+            transformed: Point3 = instance.transform.apply(vertex)  # V' = ApplyTransform(V, instance.transform)
             projected.append(
                 Camera.projectVertex(self._canvas, self._viewport, transformed)  # ProjectVertex(V')
             )

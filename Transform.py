@@ -23,19 +23,22 @@ class Transform:
     rotation: Rotation
     translation: Vec3
 
-    def apply(self, point: Point3) -> Point3:
-        """把 point 按「缩放 → 旋转 → 平移」变换到新的世界坐标点。"""
-        # ❶ 均匀缩放
-        scaled: Vec3 = Vec3(point.x * self.scale,
-                            point.y * self.scale,
-                            point.z * self.scale)
+    def apply(self, vertex: Point3) -> Point3:
+        """按「缩放 → 旋转 → 平移」把顶点变换到世界坐标点。
 
-        # ❷ 欧拉角旋转（Rx · Ry · Rz）
+        对应伪代码 ApplyTransform(vertex, transform)：
+            scaled     = Scale(vertex, scale)
+            rotated    = Rotate(scaled, rotation)
+            translated = Translate(rotated, translation)
+        """
+        # ❶ 均匀缩放（Point3 标量乘法）
+        scaled: Point3 = vertex * self.scale
+
+        # ❷ 欧拉角旋转（先 X，再 Y，最后 Z）；点 → 向量后做矩阵变换
         rotated: Vec3 = Matrix.rotation(
             (self.rotation.x, self.rotation.y, self.rotation.z)
-        ).transform(scaled)
+        ).transform(scaled.to_vec3())
 
-        # ❸ 平移
-        return Point3(rotated.x + self.translation.x,
-                      rotated.y + self.translation.y,
-                      rotated.z + self.translation.z)
+        # ❸ 局部平移（Vec3 + Vec3，再做位置点转换）
+        shifted: Vec3 = rotated + self.translation
+        return Point3(shifted.x, shifted.y, shifted.z)
