@@ -1,17 +1,17 @@
 """
-用 Rasterizer.renderInstances 渲染两个立方体线框网格（模型实例化）。
+用 Renderer.render_instances 渲染两个立方体线框网格（模型实例化）。
 
 对应 Gabriel Gambetta《Computer Graphics from Scratch》中把网格顶点投影后
 用画线法绘制三角面的栅格化管线：
 - 立方体由 geometry.Model.create_cube() 构建一次（8 个 Point3 顶点 + 12 个
   Triangle，每个三角面自带 color：红/绿/蓝/黄/紫/青分面着色）；
 - 用 geometry.Instance 把同一模型摆放到两个不同位置（transform.translation），实现物体复用；
-- Rasterizer 内部调用 Camera.projectVertex 把每个实例顶点透视投影到画布像素，
+- Renderer 内部调用 Camera.projectVertex 把每个实例顶点透视投影到画布像素，
   再逐三角面用 DrawWireframeTriangle 画三条边（线框）；
 - 结果写入 3D Canvas，最终保存为 PPM。
 
 该脚本不依赖 numpy，仅复用项目已有的 Camera / Canvas / Viewport /
-Model / Instance / Rasterizer，可独立运行。
+Model / Instance / Renderer，可独立运行。
 """
 
 import sys
@@ -31,7 +31,7 @@ from Instance import Instance
 from model.Model import Model
 from geometry.Point3 import Point3
 from geometry.Vec3 import Vec3
-from Rasterizer import Rasterizer
+from Renderer import Renderer
 from Rotation import Rotation
 from Transform import Transform
 from Viewport import Viewport
@@ -52,7 +52,7 @@ if __name__ == '__main__':
                                   distance=1.0)
 
     camera = Camera()  # 原点 (0,0,0)，看向 +z
-    rasterizer = Rasterizer(canvas, camera, viewport)
+    renderer = Renderer(None, canvas, camera, viewport)  # 栅格化实例渲染，scene 传 None
 
     # 用 Model.create_cube() 构建一个共享的立方体模型。严格按 RenderInstance 伪代码，
     # 实例只靠 transform 摆放（缩放=1、无旋转），故把世界位置并入 transform.translation
@@ -71,7 +71,7 @@ if __name__ == '__main__':
 
     # 渲染所有实例：每个 Instance 的顶点先经 transform（缩放→旋转→平移）变换，
     # 再透视投影，最后逐三角面用模型自带 color 画三条边（线框，backFaceCulling=False）。
-    rasterizer.renderInstances(instances)
+    renderer.render_instances(instances)
 
     # 输出到项目根目录下的 output/（相对本脚本位置解析，运行目录无关）。
     OUTPUT_PATH: Path = Path(__file__).resolve().parent.parent / "output" / "main_draw_two_cubes.ppm"

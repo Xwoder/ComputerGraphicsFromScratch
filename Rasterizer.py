@@ -1,14 +1,23 @@
 from __future__ import annotations
+from typing import Protocol
 
 from Camera import Camera
 from Canvas import Canvas
 from Canvas2D import Canvas2D
-from Instance import Instance
 from Viewport import Viewport
 from color.Color import Color
 from geometry.Point2 import Point2
 from geometry.Point3 import Point3
 from geometry.Triangle import Triangle
+
+
+class PixelWriter(Protocol):
+    """DrawWireframeTriangle 所需的写像素接口，Rasterizer 与 Renderer 均实现。"""
+
+    _canvas: Canvas
+
+    def _putPixelSafe(self, x: float, y: float, color: Color) -> None:
+        ...
 
 
 class Rasterizer:
@@ -49,20 +58,12 @@ class Rasterizer:
             self,
             vertices: list[Point3],
             triangles: list[Triangle],
-            *,
-            backFaceCulling: bool = False,
     ) -> None:
         """投影顶点并逐个三角面绘制，渲染一个 3D 网格物体。
 
         流程与 RenderObject(vertices, triangles) 伪代码对齐：
           ❶ 把每个顶点透视投影到画布像素坐标（ProjectVertex）；
-          ❷ 逐个三角面调用 renderTriangle 绘制（可开启背面剔除）。
-
-        Args:
-            vertices: 相机空间下的顶点列表（Point3 位置点）。
-            triangles: 三角面列表，每个元素为 Triangle（含 v 下标与 color）。
-            backFaceCulling: 是否开启背面剔除（默认关闭）。线框模式通常显示全部棱边；
-                开启后只绘制朝向相机的三角面（对凸网格更清晰）。
+          ❷ 逐个三角面调用 renderTriangle 绘制。
         """
 
         # ❶ 把每个顶点透视投影到画布像素坐标（ProjectVertex）
@@ -73,57 +74,7 @@ class Rasterizer:
 
         # ❷ 逐个三角面绘制（RenderTriangle）
         for triangle in triangles:
-            # 背面剔除：跳过背对相机的三角面
-            if backFaceCulling and self._isBackFacing(triangle, vertices):
-                continue
             self.renderTriangle(triangle, projected)
-
-    def renderInstance(self, instance: Instance) -> None:
-        """渲染单个模型实例（严格对齐 RenderInstance(instance) 伪代码）。
-
-            projected = []
-            model = instance.model
-            for V in model.vertices:
-                V' = ApplyTransform(V, instance.transform)   # Instance.applyTransform(V)
-                projected.append(ProjectVertex(V'))         # Camera.projectVertex
-            for T in model.triangles:
-                RenderTriangle(T, projected)                # self.renderTriangle
-
-        严格按伪代码：此处只施加 instance.transform（缩放→旋转→平移），
-        不含 Instance 独立的 position 字段。若要把实例摆到特定世界位置，
-        请把该位置并入 transform.translation（与伪代码只传 transform 一致）。
-
-        Args:
-            instance: 单个 Instance（含 model、transform）。
-        """
-        model = instance.model
-
-        # 投影每个变换后的顶点（ApplyTransform + ProjectVertex）
-        projected: list[Point2] = []
-        for vertex in model.vertices:
-            transformed: Point3 = instance.transform.apply(vertex)  # V' = ApplyTransform(V, instance.transform)
-            projected.append(
-                Camera.projectVertex(self._canvas, self._viewport, transformed)  # ProjectVertex(V')
-            )
-
-        # 逐个三角面绘制（RenderTriangle）
-        for triangle in model.triangles:
-            self.renderTriangle(triangle, projected)
-
-    def renderInstances(self, instances: list[Instance]) -> None:
-        """渲染一组模型实例（instancing）。
-
-        每个 Instance 由 (model, position, transform) 组成：先把模型顶点按局部
-        transform（缩放 → 旋转 → 平移）变换，再整体平移到实例所在的世界位置
-        position（顶点 = applyTransform(模型顶点) + position），最后交给
-        renderObject 投影绘制。多个 Instance 可共享同一个 Model，仅以不同
-        transform / position 摆放，实现物体复用。
-
-        Args:
-            instances: 实例列表，每个元素为 Instance（含 model、position、transform）。
-        """
-        for inst in instances:
-            self.renderInstance(inst)
 
     def renderTriangle(self,
                        triangle: Triangle,
@@ -142,27 +93,6 @@ class Rasterizer:
                               triangle.color,
                               self)
 
-    def _isBackFacing(self,
-                      triangle: Triangle,
-                      vertices: list[Point3]) -> bool:
-        """判断三角面是否背对相机（需剔除）。
-
-        用相机空间下的三个顶点算几何法向 N = (B-A) × (C-A)，相机位于原点，
-        三角面朝向相机当且仅当 N·(origin - A) > 0（即 N·A < 0）。返回 True 表示
-        背对（应被剔除）。该法向测试与投影后的屏幕朝向无关，对凸网格稳定可靠。
-        """
-        a, b, c = (vertices[i] for i in triangle.vertex_indices)
-        ab = b - a  # Point3 - Point3 -> Vec3
-        ac = c - a
-
-        # 叉积 (B-A) × (C-A)
-        nx = ab.y * ac.z - ab.z * ac.y
-        ny = ab.z * ac.x - ab.x * ac.z
-        nz = ab.x * ac.y - ab.y * ac.x
-
-        # N·A >= 0 视为背对相机
-        return (nx * a.x + ny * a.y + nz * a.z) >= 0
-
     def _putPixelSafe(self,
                       x: float,
                       y: float,
@@ -178,7 +108,7 @@ def DrawWireframeTriangle(p0: Point2,
                           p1: Point2,
                           p2: Point2,
                           color: Color,
-                          rasterizer: Rasterizer) -> None:
+                          writer: PixelWriter) -> None:
     """线框三角形：用 color 画出三角形的三条边（p0→p1→p2→p0）。
 
     每条边复用 Canvas2D.draw_line（对称直线栅格化）得到被点亮的栅格单元，
@@ -186,4 +116,4 @@ def DrawWireframeTriangle(p0: Point2,
     """
     for a, b in ((p0, p1), (p1, p2), (p2, p0)):
         for cell in Canvas2D.draw_line(a, b):
-            rasterizer._putPixelSafe(cell.x, cell.y, color)
+            writer._putPixelSafe(cell.x, cell.y, color)
