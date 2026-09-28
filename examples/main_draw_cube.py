@@ -79,20 +79,22 @@ if __name__ == '__main__':
                                   height=viewportHeight,
                                   distance=1.0)
 
+
     # 便捷封装：相机空间顶点（Point3 位置点）→ 画布像素坐标（Point2）。
     def project(v: Point3):
         return Camera.projectVertex(canvas, viewport, v)
 
+
     # 立方体的 8 个顶点（相机空间下的空间位置点，单位与视口一致）。
     # 前面（front）z = 5，后面（back）z = 6。
     vAf = Point3(-2, -0.5, 5)
-    vBf = Point3(-2,  0.5, 5)
-    vCf = Point3(-1,  0.5, 5)
+    vBf = Point3(-2, 0.5, 5)
+    vCf = Point3(-1, 0.5, 5)
     vDf = Point3(-1, -0.5, 5)
 
     vAb = Point3(-2, -0.5, 6)
-    vBb = Point3(-2,  0.5, 6)
-    vCb = Point3(-1,  0.5, 6)
+    vBb = Point3(-2, 0.5, 6)
+    vCb = Point3(-1, 0.5, 6)
     vDb = Point3(-1, -0.5, 6)
 
     # 前面（蓝色）
