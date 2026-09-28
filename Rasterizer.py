@@ -90,9 +90,9 @@ class Rasterizer:
             instances: 实例列表，每个元素为 Instance（含 model 与 position）。
         """
         for inst in instances:
-            offset = inst.position.to_vec3()
+            offset: Vec3 = inst.position.to_vec3()
             # 模型顶点平移到实例位置（position 即世界坐标，相机在原点看向 +z）
-            world_vertices = [v + offset for v in inst.model.vertices]
+            world_vertices: list[Point3] = [v + offset for v in inst.model.vertices]
             self.renderObject(world_vertices, inst.model.triangles)
 
     def renderTriangle(self,
