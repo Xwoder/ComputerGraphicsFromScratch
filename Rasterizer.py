@@ -82,17 +82,22 @@ class Rasterizer:
     def renderInstances(self, instances: list[Instance]) -> None:
         """渲染一组模型实例（instancing）。
 
-        每个 Instance 由 (model, position) 组成：先把模型顶点平移到实例所在的世界
-        位置（顶点 = 模型顶点 + position），再交给 renderObject 投影绘制。多个
-        Instance 可共享同一个 Model，仅以不同 position 摆放，实现物体复用。
+        每个 Instance 由 (model, position, transform) 组成：先把模型顶点按局部
+        transform（缩放 → 旋转 → 平移）变换，再整体平移到实例所在的世界位置
+        position（顶点 = transform.apply(模型顶点) + position），最后交给
+        renderObject 投影绘制。多个 Instance 可共享同一个 Model，仅以不同
+        transform / position 摆放，实现物体复用。
 
         Args:
-            instances: 实例列表，每个元素为 Instance（含 model 与 position）。
+            instances: 实例列表，每个元素为 Instance（含 model、position、transform）。
         """
         for inst in instances:
             offset: Vec3 = inst.position.to_vec3()
-            # 模型顶点平移到实例位置（position 即世界坐标，相机在原点看向 +z）
-            world_vertices: list[Point3] = [v + offset for v in inst.model.vertices]
+            # 先对模型顶点施加局部变换（缩放/旋转/平移），
+            # 再整体平移到实例的世界位置（position 即世界坐标，相机在原点看向 +z）
+            world_vertices: list[Point3] = [
+                inst.transform.apply(v) + offset for v in inst.model.vertices
+            ]
             self.renderObject(world_vertices, inst.model.triangles)
 
     def renderTriangle(self,
