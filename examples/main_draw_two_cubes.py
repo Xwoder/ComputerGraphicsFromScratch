@@ -67,6 +67,6 @@ if __name__ == '__main__':
     rasterizer.renderInstances(instances)
 
     # 输出到项目根目录下的 output/（相对本脚本位置解析，运行目录无关）。
-    OUTPUT_PATH: Path = Path(__file__).resolve().parent.parent / "output" / "graph_object.ppm"
+    OUTPUT_PATH: Path = Path(__file__).resolve().parent.parent / "output" / "main_draw_two_cubes.ppm"
     canvas.savePPM(OUTPUT_PATH)
     print(f"saved: {OUTPUT_PATH}")
