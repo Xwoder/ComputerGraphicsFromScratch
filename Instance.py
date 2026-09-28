@@ -47,13 +47,13 @@ class Instance:
         """
         t: Transform = transform if transform is not None else self.transform
 
-        # ❶ 均匀缩放（Point3 → Vec3 后标量乘法）
-        scaled: Vec3 = (vertex.to_vec3() * t.scale)
+        # ❶ 均匀缩放（Point3 标量乘法）
+        scaled: Point3 = vertex * t.scale
 
-        # ❷ 欧拉角旋转（先 X，再 Y，最后 Z）
+        # ❷ 欧拉角旋转（先 X，再 Y，最后 Z）；点 → 向量后做矩阵变换
         rotated: Vec3 = Matrix.rotation(
             (t.rotation.x, t.rotation.y, t.rotation.z)
-        ).transform(scaled)
+        ).transform(scaled.to_vec3())
 
         # ❸ 局部平移（Vec3 + Vec3，再做位置点转换）
         shifted: Vec3 = rotated + t.translation
