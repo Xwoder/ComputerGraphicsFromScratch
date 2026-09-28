@@ -8,7 +8,7 @@ from light.PointLight import PointLight
 from Number import Number
 from geometry.Point3 import Point3
 from Ray import Ray
-from Scene import Scene
+from RayTracingScene import RayTracingScene
 from geometry.Vec3 import Vec3
 
 # 着色点自交规避偏移：反射/阴影射线起点沿方向偏移该值，避免命中着色点自身。
@@ -22,12 +22,12 @@ _SHADOW_INTERVAL_DIR = Interval(SHADOW_EPSILON, math.inf)
 
 
 class RayTracer:
-    _scene: Scene
+    _scene: RayTracingScene
 
     # 反射递归次数上限：达到上限或物体不反射时停止递归。
     MAX_RECURSION_DEPTH: int = 3
 
-    def __init__(self, scene: Scene):
+    def __init__(self, scene: RayTracingScene):
         self._scene = scene
 
     def traceRay(
@@ -40,7 +40,7 @@ class RayTracer:
         追踪一条射线，返回它"看到的"颜色（含阴影与递归反射）。
 
         流程与参考实现 TraceRay(O, D, t_min, t_max, recursion_depth) 对齐：
-        1. 调用 `Scene.closestIntersection` 取最近命中（区间 [t_min, ∞)）；
+        1. 调用 `RayTracingScene.closestIntersection` 取最近命中（区间 [t_min, ∞)）；
         2. 未命中则返回场景背景色；
         3. 命中则求交点 P、法向 N，交给 `compute_lighting` 算光照强度，
            得到本地色 local_color；
