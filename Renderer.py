@@ -1,7 +1,7 @@
 from Camera import Camera
 from Canvas import Canvas
 from Instance import Instance
-from Rasterizer import DrawWireframeTriangle
+from Rasterizer import PixelWriter
 from Ray import Ray
 from RayTracer import RayTracer
 from Scene import Scene
@@ -15,7 +15,7 @@ from model.Model import Model
 from Viewport import Viewport
 
 
-class Renderer:
+class Renderer(PixelWriter):
     """统一渲染器：同时支持光线追踪（render）与栅格化实例渲染（render_scene / render_model）。"""
 
     _scene: Scene | None
@@ -79,20 +79,12 @@ class Renderer:
         """把世界坐标点透视投影到画布像素坐标（委托 Camera.projectVertex）。"""
         return Camera.projectVertex(self._canvas, self._viewport, world_vertex)
 
-    def _putPixelSafe(self, x: float, y: float, color: Color) -> None:
-        """带边界检查的写像素：越界（投影到画布外）的栅格单元直接忽略。"""
-        xi = round(x)
-        yi = round(y)
-        if 0 <= xi < self._canvas.width and 0 <= yi < self._canvas.height:
-            self._canvas.putPixel(xi, yi, color)
-
     def render_triangle(self, triangle: Triangle, projected: list[Point2]) -> None:
-        """绘制单个三角面：取三个投影顶点连同面颜色，交给 DrawWireframeTriangle。"""
-        DrawWireframeTriangle(projected[triangle.vertex_indices[0]],
-                              projected[triangle.vertex_indices[1]],
-                              projected[triangle.vertex_indices[2]],
-                              triangle.color,
-                              self)
+        """绘制单个三角面：取三个投影顶点连同面颜色，交给 draw_wireframe_triangle。"""
+        self.draw_wireframe_triangle(projected[triangle.vertex_indices[0]],
+                                     projected[triangle.vertex_indices[1]],
+                                     projected[triangle.vertex_indices[2]],
+                                     triangle.color)
 
     def render_model(self, model: Model, transform: Matrix4) -> None:
         """渲染单个模型（对齐 RenderModel(model, transform) 伪代码）。

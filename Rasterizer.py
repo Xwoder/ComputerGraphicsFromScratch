@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import Protocol
 
 from Camera import Camera
 from Canvas import Canvas
@@ -11,16 +10,39 @@ from geometry.Point3 import Point3
 from geometry.Triangle import Triangle
 
 
-class PixelWriter(Protocol):
-    """DrawWireframeTriangle 所需的写像素接口，Rasterizer 与 Renderer 均实现。"""
+class PixelWriter:
+    """线框三角面绘制所需的像素写入基类，Rasterizer 与 Renderer 均继承。
+
+    提供统一的带边界检查写像素（_putPixelSafe）与线框三角形绘制
+    （draw_wireframe_triangle，对应原模块级函数 DrawWireframeTriangle）。
+    子类只需在 __init__ 中设置 self._canvas。
+    """
 
     _canvas: Canvas
 
     def _putPixelSafe(self, x: float, y: float, color: Color) -> None:
-        ...
+        """带边界检查的写像素：越界（投影到画布外）的栅格单元直接忽略。"""
+        xi = round(x)
+        yi = round(y)
+        if 0 <= xi < self._canvas.width and 0 <= yi < self._canvas.height:
+            self._canvas.putPixel(xi, yi, color)
+
+    def draw_wireframe_triangle(self,
+                               p0: Point2,
+                               p1: Point2,
+                               p2: Point2,
+                               color: Color) -> None:
+        """线框三角形：用 color 画出三角形的三条边（p0→p1→p2→p0）。
+
+        每条边复用 Canvas2D.draw_line（对称直线栅格化）得到被点亮的栅格单元，
+        再逐格安全写入 3D Canvas 像素缓冲。
+        """
+        for a, b in ((p0, p1), (p1, p2), (p2, p0)):
+            for cell in Canvas2D.draw_line(a, b):
+                self._putPixelSafe(cell.x, cell.y, color)
 
 
-class Rasterizer:
+class Rasterizer(PixelWriter):
     """栅格化渲染器：把「顶点 + 三角面」描述的 3D 网格投影到画布并绘制。
 
     对应 Gabriel Gambetta《Computer Graphics from Scratch》中把顶点透视投影
@@ -30,7 +52,7 @@ class Rasterizer:
     流程（与 RenderObject/RenderTriangle 伪代码对齐）：
       - RenderObject：投影每个顶点 → 逐个三角面调用 RenderTriangle；
       - RenderTriangle：取该三角面三个投影后的画布坐标，连同面颜色交给
-        DrawWireframeTriangle 画三条边（线框）；
+        draw_wireframe_triangle 画三条边（线框）；
       - 顶点投影由 Camera.projectVertex 完成（透视除 z + 视口→画布换算）。
 
     Attributes:
@@ -79,41 +101,15 @@ class Rasterizer:
     def renderTriangle(self,
                        triangle: Triangle,
                        projected: list[Point2]) -> None:
-        """绘制单个三角面：取三个投影顶点连同面颜色，交给 DrawWireframeTriangle。
+        """绘制单个三角面：取三个投影顶点连同面颜色，交给 draw_wireframe_triangle。
 
         对应 RenderTriangle(triangle, projected)：
-            DrawWireframeTriangle(projected[triangle.vertex_indices[0]],
-                                  projected[triangle.vertex_indices[1]],
-                                  projected[triangle.vertex_indices[2]],
-                                  triangle.color)
+            draw_wireframe_triangle(projected[triangle.vertex_indices[0]],
+                                    projected[triangle.vertex_indices[1]],
+                                    projected[triangle.vertex_indices[2]],
+                                    triangle.color)
         """
-        DrawWireframeTriangle(projected[triangle.vertex_indices[0]],
-                              projected[triangle.vertex_indices[1]],
-                              projected[triangle.vertex_indices[2]],
-                              triangle.color,
-                              self)
-
-    def _putPixelSafe(self,
-                      x: float,
-                      y: float,
-                      color: Color) -> None:
-        """带边界检查的写像素：越界（投影到画布外）的栅格单元直接忽略。"""
-        xi = round(x)
-        yi = round(y)
-        if 0 <= xi < self._canvas.width and 0 <= yi < self._canvas.height:
-            self._canvas.putPixel(xi, yi, color)
-
-
-def DrawWireframeTriangle(p0: Point2,
-                          p1: Point2,
-                          p2: Point2,
-                          color: Color,
-                          writer: PixelWriter) -> None:
-    """线框三角形：用 color 画出三角形的三条边（p0→p1→p2→p0）。
-
-    每条边复用 Canvas2D.draw_line（对称直线栅格化）得到被点亮的栅格单元，
-    再逐格安全写入 3D Canvas 像素缓冲。
-    """
-    for a, b in ((p0, p1), (p1, p2), (p2, p0)):
-        for cell in Canvas2D.draw_line(a, b):
-            writer._putPixelSafe(cell.x, cell.y, color)
+        self.draw_wireframe_triangle(projected[triangle.vertex_indices[0]],
+                                     projected[triangle.vertex_indices[1]],
+                                     projected[triangle.vertex_indices[2]],
+                                     triangle.color)
