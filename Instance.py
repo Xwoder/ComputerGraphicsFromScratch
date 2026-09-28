@@ -20,7 +20,7 @@ class Instance:
       position 之前先作用于模型顶点，用于原地缩放 / 旋转模型。
 
     渲染时，实例的实际顶点 = transform.apply(模型顶点) + position，
-    再交给 Rasterizer 投影绘制。
+    再交给 Renderer 投影绘制。
     """
 
     model: Model
