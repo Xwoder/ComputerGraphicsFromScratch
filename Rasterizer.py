@@ -79,12 +79,36 @@ class Rasterizer:
                 continue
             self.renderTriangle(triangle, projected)
 
+    def renderInstance(self, instance: Instance) -> None:
+        """渲染单个模型实例（对齐 RenderInstance(instance) 伪代码）。
+
+        流程：
+          ❶ 逐个顶点做局部变换（缩放 → 旋转 → 平移），即伪代码的
+             ApplyTransform(V, instance.transform) —— 此处复用 Instance.applyTransform；
+          ❷ 再整体平移到实例的世界位置 position（相机在原点看向 +z，故 z 需为正）。
+             这一步是伪代码之外的补充：当前 Instance 用独立 position 字段承载世界摆放，
+             而伪代码仅含 transform；保留它以兼容既有实例化示例。
+          ❸ 把变换后的世界顶点交给 renderObject 投影并逐三角面绘制（线框）。
+
+        多个实例只需循环调用本方法，共享同一 Model 即可实现物体复用。
+
+        Args:
+            instance: 单个 Instance（含 model、position、transform）。
+        """
+        offset: Vec3 = instance.position.to_vec3()
+        # 先施加局部变换（applyTransform 内部：缩放→旋转→平移），
+        # 再整体平移到实例的世界位置 position。
+        world_vertices: list[Point3] = [
+            instance.applyTransform(v) + offset for v in instance.model.vertices
+        ]
+        self.renderObject(world_vertices, instance.model.triangles)
+
     def renderInstances(self, instances: list[Instance]) -> None:
         """渲染一组模型实例（instancing）。
 
         每个 Instance 由 (model, position, transform) 组成：先把模型顶点按局部
         transform（缩放 → 旋转 → 平移）变换，再整体平移到实例所在的世界位置
-        position（顶点 = transform.apply(模型顶点) + position），最后交给
+        position（顶点 = applyTransform(模型顶点) + position），最后交给
         renderObject 投影绘制。多个 Instance 可共享同一个 Model，仅以不同
         transform / position 摆放，实现物体复用。
 
@@ -92,13 +116,7 @@ class Rasterizer:
             instances: 实例列表，每个元素为 Instance（含 model、position、transform）。
         """
         for inst in instances:
-            offset: Vec3 = inst.position.to_vec3()
-            # 先对模型顶点施加局部变换（缩放/旋转/平移），
-            # 再整体平移到实例的世界位置（position 即世界坐标，相机在原点看向 +z）
-            world_vertices: list[Point3] = [
-                inst.transform.apply(v) + offset for v in inst.model.vertices
-            ]
-            self.renderObject(world_vertices, inst.model.triangles)
+            self.renderInstance(inst)
 
     def renderTriangle(self,
                        triangle: Triangle,
