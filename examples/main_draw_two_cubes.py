@@ -35,6 +35,7 @@ from Rotation import Rotation
 from RasterizationScene import RasterizationScene
 from Transform import Transform
 from Viewport import Viewport
+from ImageViewer import ImageViewer
 
 
 if __name__ == '__main__':
@@ -77,3 +78,6 @@ if __name__ == '__main__':
     OUTPUT_PATH: Path = Path(__file__).resolve().parent.parent / "output" / "main_draw_two_cubes.ppm"
     canvas.savePPM(OUTPUT_PATH)
     print(f"saved: {OUTPUT_PATH}")
+
+    # 渲染完成后用系统默认查看器打开图片（复用项目已有的 ImageViewer）。
+    ImageViewer.open_image(str(OUTPUT_PATH))
