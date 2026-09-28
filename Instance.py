@@ -1,7 +1,10 @@
 from dataclasses import dataclass, field
+from typing import Optional
 
 from model.Model import Model
 from geometry.Point3 import Point3
+from geometry.Vec3 import Vec3
+from geometry.Matrix import Matrix
 from Rotation import Rotation
 from Transform import Transform
 
@@ -25,5 +28,33 @@ class Instance:
     model: Model
     position: Point3
     transform: Transform = field(
-        default_factory=lambda: Transform(1, Rotation(0, 0, 0), Point3(0, 0, 0))
+        default_factory=lambda: Transform(1, Rotation(0, 0, 0), Vec3(0, 0, 0))
     )
+
+    def applyTransform(self,
+                       vertex: Point3,
+                       transform: Optional[Transform] = None) -> Point3:
+        """按「缩放 → 旋转 → 平移」把模型顶点变换到（局部）世界坐标。
+
+        对应伪代码 ApplyTransform(vertex, transform)：
+            scaled     = Scale(vertex, transform.scale)
+            rotated    = Rotate(scaled, transform.rotation)
+            translated = Translate(rotated, transform.translation)
+
+        默认使用实例自身的 self.transform；也可显式传入其它 transform。
+        注意：此处只施加局部变换，尚未叠加 instance.position 的整体世界平移
+        （镜像 RenderInstance 中 transform 与 position 分开处理的设计）。
+        """
+        t: Transform = transform if transform is not None else self.transform
+
+        # ❶ 均匀缩放（Point3 → Vec3 后标量乘法）
+        scaled: Vec3 = (vertex.to_vec3() * t.scale)
+
+        # ❷ 欧拉角旋转（先 X，再 Y，最后 Z）
+        rotated: Vec3 = Matrix.rotation(
+            (t.rotation.x, t.rotation.y, t.rotation.z)
+        ).transform(scaled)
+
+        # ❸ 局部平移（Vec3 + Vec3，再做位置点转换）
+        shifted: Vec3 = rotated + t.translation
+        return Point3(shifted.x, shifted.y, shifted.z)

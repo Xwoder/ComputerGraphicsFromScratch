@@ -16,12 +16,12 @@ class Transform:
       （先 X，再 Y，最后 Z）。
     - translation：局部平移偏移（在缩放/旋转之后施加）。
 
-    单位变换为 Transform(1, Rotation(0,0,0), Point3(0,0,0))，作用于任意点恒等不变。
+    单位变换为 Transform(1, Rotation(0,0,0), Vec3(0,0,0))，作用于任意点恒等不变。
     """
 
     scale: Number
     rotation: Rotation
-    translation: Point3
+    translation: Vec3
 
     def apply(self, point: Point3) -> Point3:
         """把 point 按「缩放 → 旋转 → 平移」变换到新的世界坐标点。"""
