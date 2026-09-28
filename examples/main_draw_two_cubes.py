@@ -29,7 +29,6 @@ from Canvas import Canvas
 from Number import Number
 from Instance import Instance
 from model.Model import Model
-from geometry.Point3 import Point3
 from geometry.Vec3 import Vec3
 from Renderer import Renderer
 from Rotation import Rotation
@@ -62,10 +61,8 @@ if __name__ == '__main__':
     cube = Model.create_cube()
     instances = [
         Instance(cube,
-                 position=Point3(0, 0, 0),
                  transform=Transform(1, Rotation(0, 0, 0), Vec3(-1.5, 0, 7))),
         Instance(cube,
-                 position=Point3(0, 0, 0),
                  transform=Transform(1, Rotation(0, 0, 0), Vec3(1.25, 2, 7.5))),
     ]
 
