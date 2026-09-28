@@ -2,7 +2,6 @@ from dataclasses import dataclass
 
 from Number import Number
 from Rotation import Rotation
-from geometry.Matrix import Matrix
 from geometry.Point3 import Point3
 from geometry.Vec3 import Vec3
 
@@ -23,7 +22,7 @@ class Transform:
     rotation: Rotation
     translation: Vec3
 
-    def apply(self, vertex: Point3) -> Point3:
+    def apply(self, point: Point3) -> Point3:
         """按「缩放 → 旋转 → 平移」把顶点变换到世界坐标点。
 
         对应伪代码 ApplyTransform(vertex, transform)：
@@ -31,14 +30,6 @@ class Transform:
             rotated    = Rotate(scaled, rotation)
             translated = Translate(rotated, translation)
         """
-        # ❶ 均匀缩放（Point3 标量乘法）
-        scaled: Point3 = vertex * self.scale
-
-        # ❷ 欧拉角旋转（先 X，再 Y，最后 Z）；点 → 向量后做矩阵变换
-        rotated: Vec3 = Matrix.rotation(
-            (self.rotation.x, self.rotation.y, self.rotation.z)
-        ).transform(scaled.to_vec3())
-
-        # ❸ 局部平移（Vec3 + Vec3，再做位置点转换）
-        shifted: Vec3 = rotated + self.translation
-        return Point3(shifted.x, shifted.y, shifted.z)
+        scaled = point * self.scale
+        rotated = self.rotation.apply(scaled)
+        return rotated + self.translation
