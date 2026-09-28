@@ -42,3 +42,7 @@ class Point3:
             self.y + vector.y,
             self.z + vector.z,
         )
+
+    def to_vec3(self) -> Vec3:
+        """把点当作从原点出发的位置向量，转换为 Vec3。"""
+        return Vec3(self.x, self.y, self.z)
