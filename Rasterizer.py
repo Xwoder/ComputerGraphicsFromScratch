@@ -3,6 +3,7 @@ from __future__ import annotations
 from Camera import Camera
 from Canvas import Canvas
 from Canvas2D import Canvas2D
+from Instance import Instance
 from Viewport import Viewport
 from color.Color import Color
 from geometry.Point2 import Point2
