@@ -10,6 +10,11 @@ dependencies = [
 
 [tool.mypy]
 python_version = "3.14"
+# 项目混用顶层模块（from Camera import Camera）与命名空间子包
+# （from color.Color import Color），需显式声明唯一包基为项目根，
+# 否则 mypy 会把 color/ 也当成包基，使 color/Color.py 同时解析为
+# "Color" 与 "color.Color" 而报重复模块名错误。
+explicit_package_bases = true
 warn_unused_configs = true
 warn_redundant_casts = true
 warn_unused_ignores = true
