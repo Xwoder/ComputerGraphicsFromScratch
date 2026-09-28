@@ -9,7 +9,6 @@ from color.Color import Color
 from geometry.Point2 import Point2
 from geometry.Point3 import Point3
 from geometry.Triangle import Triangle
-from geometry.Vec3 import Vec3
 
 
 class Rasterizer:
@@ -80,28 +79,36 @@ class Rasterizer:
             self.renderTriangle(triangle, projected)
 
     def renderInstance(self, instance: Instance) -> None:
-        """渲染单个模型实例（对齐 RenderInstance(instance) 伪代码）。
+        """渲染单个模型实例（严格对齐 RenderInstance(instance) 伪代码）。
 
-        流程：
-          ❶ 逐个顶点做局部变换（缩放 → 旋转 → 平移），即伪代码的
-             ApplyTransform(V, instance.transform) —— 此处复用 Instance.applyTransform；
-          ❷ 再整体平移到实例的世界位置 position（相机在原点看向 +z，故 z 需为正）。
-             这一步是伪代码之外的补充：当前 Instance 用独立 position 字段承载世界摆放，
-             而伪代码仅含 transform；保留它以兼容既有实例化示例。
-          ❸ 把变换后的世界顶点交给 renderObject 投影并逐三角面绘制（线框）。
+            projected = []
+            model = instance.model
+            for V in model.vertices:
+                V' = ApplyTransform(V, instance.transform)   # Instance.applyTransform(V)
+                projected.append(ProjectVertex(V'))         # Camera.projectVertex
+            for T in model.triangles:
+                RenderTriangle(T, projected)                # self.renderTriangle
 
-        多个实例只需循环调用本方法，共享同一 Model 即可实现物体复用。
+        严格按伪代码：此处只施加 instance.transform（缩放→旋转→平移），
+        不含 Instance 独立的 position 字段。若要把实例摆到特定世界位置，
+        请把该位置并入 transform.translation（与伪代码只传 transform 一致）。
 
         Args:
-            instance: 单个 Instance（含 model、position、transform）。
+            instance: 单个 Instance（含 model、transform）。
         """
-        offset: Vec3 = instance.position.to_vec3()
-        # 先施加局部变换（applyTransform 内部：缩放→旋转→平移），
-        # 再整体平移到实例的世界位置 position。
-        world_vertices: list[Point3] = [
-            instance.applyTransform(v) + offset for v in instance.model.vertices
-        ]
-        self.renderObject(world_vertices, instance.model.triangles)
+        model = instance.model
+
+        # 投影每个变换后的顶点（ApplyTransform + ProjectVertex）
+        projected: list[Point2] = []
+        for vertex in model.vertices:
+            transformed: Point3 = instance.applyTransform(vertex)  # V' = ApplyTransform(V, instance.transform)
+            projected.append(
+                Camera.projectVertex(self._canvas, self._viewport, transformed)  # ProjectVertex(V')
+            )
+
+        # 逐个三角面绘制（RenderTriangle）
+        for triangle in model.triangles:
+            self.renderTriangle(triangle, projected)
 
     def renderInstances(self, instances: list[Instance]) -> None:
         """渲染一组模型实例（instancing）。

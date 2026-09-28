@@ -5,7 +5,7 @@
 用画线法绘制三角面的栅格化管线：
 - 立方体由 geometry.Model.create_cube() 构建一次（8 个 Point3 顶点 + 12 个
   Triangle，每个三角面自带 color：红/绿/蓝/黄/紫/青分面着色）；
-- 用 geometry.Instance 把同一模型摆放到两个不同位置（position），实现物体复用；
+- 用 geometry.Instance 把同一模型摆放到两个不同位置（transform.translation），实现物体复用；
 - Rasterizer 内部调用 Camera.projectVertex 把每个实例顶点透视投影到画布像素，
   再逐三角面用 DrawWireframeTriangle 画三条边（线框）；
 - 结果写入 3D Canvas，最终保存为 PPM。
@@ -30,7 +30,10 @@ from Number import Number
 from Instance import Instance
 from model.Model import Model
 from geometry.Point3 import Point3
+from geometry.Vec3 import Vec3
 from Rasterizer import Rasterizer
+from Rotation import Rotation
+from Transform import Transform
 from Viewport import Viewport
 
 
@@ -51,19 +54,23 @@ if __name__ == '__main__':
     camera = Camera()  # 原点 (0,0,0)，看向 +z
     rasterizer = Rasterizer(canvas, camera, viewport)
 
-    # 用 Model.create_cube() 构建一个共享的立方体模型，然后用 Instance 把它
-    # 摆放到两个不同位置（世界坐标，相机在原点看向 +z，故 z 需为正）：
-    #   - 实例 1：position = (-1.5, 0, 7)
-    #   - 实例 2：position = (1.25, 2, 7.5)
-    # 两个实例复用同一个 cube 模型，仅以不同 position 摆放（物体复用 / 实例化）。
+    # 用 Model.create_cube() 构建一个共享的立方体模型。严格按 RenderInstance 伪代码，
+    # 实例只靠 transform 摆放（缩放=1、无旋转），故把世界位置并入 transform.translation
+    # （相机在原点看向 +z，故 z 需为正）。两个实例复用同一个 cube 模型（物体复用 / 实例化）：
+    #   - 实例 1：translation = (-1.5, 0, 7)
+    #   - 实例 2：translation = (1.25, 2, 7.5)
     cube = Model.create_cube()
     instances = [
-        Instance(cube, position=Point3(-1.5, 0, 7)),
-        Instance(cube, position=Point3(1.25, 2, 7.5)),
+        Instance(cube,
+                 position=Point3(0, 0, 0),
+                 transform=Transform(1, Rotation(0, 0, 0), Vec3(-1.5, 0, 7))),
+        Instance(cube,
+                 position=Point3(0, 0, 0),
+                 transform=Transform(1, Rotation(0, 0, 0), Vec3(1.25, 2, 7.5))),
     ]
 
-    # 渲染所有实例：每个 Instance 的顶点 = 模型顶点 + 实例位置，再逐三角面用
-    # 模型自带 color 画三条边（线框模式默认显示全部棱边，backFaceCulling=False）。
+    # 渲染所有实例：每个 Instance 的顶点先经 transform（缩放→旋转→平移）变换，
+    # 再透视投影，最后逐三角面用模型自带 color 画三条边（线框，backFaceCulling=False）。
     rasterizer.renderInstances(instances)
 
     # 输出到项目根目录下的 output/（相对本脚本位置解析，运行目录无关）。
