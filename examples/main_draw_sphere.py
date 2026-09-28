@@ -13,7 +13,7 @@ from geometry.RotationMatrix import RotationMatrix
 from Number import Number
 from geometry.Point3 import Point3
 from Renderer import Renderer
-from Scene import Scene
+from RayTracingScene import RayTracingScene
 from Sphere import Sphere
 from geometry.Vec3 import Vec3
 from Viewport import Viewport
@@ -55,7 +55,7 @@ if __name__ == '__main__':
         PointLight(0.6, Point3(2, 1, 0)),
         DirectionalLight(0.6, Vec3(1, 4, 4)),
     ]
-    scene: Scene = Scene(spheres=spheres, lights=lights)
+    scene: RayTracingScene = RayTracingScene(spheres=spheres, lights=lights)
 
     renderer: Renderer = Renderer(scene, canvas, camera, viewport)
     renderer.render()
