@@ -32,6 +32,7 @@ from color.Color import Color
 from Number import Number
 from geometry.Point3 import Point3
 from Viewport import Viewport
+from ImageViewer import ImageViewer
 
 
 def draw_line(canvas: Canvas, p0, p1, color: Color) -> None:
@@ -119,3 +120,6 @@ if __name__ == '__main__':
     OUTPUT_PATH: Path = Path(__file__).resolve().parent.parent / "output" / "graph_cube.ppm"
     canvas.savePPM(OUTPUT_PATH)
     print(f"saved: {OUTPUT_PATH}")
+
+    # 渲染完成后用系统默认查看器打开图片（复用项目已有的 ImageViewer）。
+    ImageViewer.open_image(str(OUTPUT_PATH))
