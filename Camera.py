@@ -5,21 +5,25 @@ from Canvas import Canvas
 from geometry.Matrix import Matrix
 from geometry.Point2 import Point2
 from geometry.Point3 import Point3
+from geometry.Vec3 import Vec3
 from Viewport import Viewport
 
 
 @dataclass
 class Camera:
     """
-    相机：提供视线起点（origin）与朝向（rotation）。
+    相机：提供视线起点（origin）、朝向（rotation）与额外平移（translation）。
 
     - origin：相机在世界坐标系中的位置。
     - rotation：3×3 旋转矩阵（Matrix），把视口局部方向变换到世界方向。
       默认单位矩阵，即相机不旋转、看向 +z（与旧版行为一致）。
+    - translation：在 origin 之上叠加的额外世界空间平移偏移（Vec3），
+      默认零向量。用于在不改动 origin 语义的前提下整体平移相机视点。
     """
 
     origin: Point3 = Point3(0, 0, 0)
     rotation: Matrix = field(default_factory=Matrix.identity)
+    translation: Vec3 = field(default_factory=lambda: Vec3(0, 0, 0))
 
     @staticmethod
     def canvasToViewport(
