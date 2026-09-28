@@ -48,6 +48,10 @@ class Matrix:
     def column_count(self) -> int:
         return len(self.rows[0])
 
+    def transpose(self) -> Matrix:
+        """返回转置矩阵（行、列互换）。对正交旋转矩阵，转置即逆矩阵。"""
+        return Matrix(tuple(zip(*self.rows)))
+
     def __getitem__(self, index: int) -> tuple[Number, ...]:
         return tuple(self.rows[index])
 

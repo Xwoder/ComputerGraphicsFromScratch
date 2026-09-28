@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from Number import Number
 from Canvas import Canvas
 from geometry.Matrix import Matrix
+from geometry.Matrix4 import Matrix4
 from geometry.Point2 import Point2
 from geometry.Point3 import Point3
 from geometry.Vec3 import Vec3
@@ -120,3 +121,17 @@ class Camera:
         d = viewport.distance
         return Camera.viewportToCanvas(
             canvas, viewport, vertex.x * d / vertex.z, vertex.y * d / vertex.z)
+
+    def make_camera_matrix(self) -> Matrix4:
+        """构造世界→相机空间的 4×4 齐次视图矩阵（MakeCameraMatrix）。
+
+        Camera.rotation 把相机局部方向变换到世界方向，故其转置（正交逆）即
+        世界→相机方向的旋转；再平移把相机位置移到原点，得到
+        M_camera = R^{-1} · T(-position)。相机位于原点、朝向 +z 时为单位矩阵，
+        与 RenderScene 伪代码里 M_camera * I.transform 的合成一致。
+        """
+        position = self.origin + self.translation  # Point3 + Vec3 -> Point3
+        rotation_inv = self.rotation.transpose()
+        return Matrix4.from_matrix3(rotation_inv) @ Matrix4.translation(
+            -position.x, -position.y, -position.z
+        )

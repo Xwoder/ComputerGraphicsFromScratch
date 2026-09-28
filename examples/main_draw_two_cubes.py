@@ -1,5 +1,5 @@
 """
-用 Renderer.render_instances 渲染两个立方体线框网格（模型实例化）。
+用 Renderer.render_scene 渲染两个立方体线框网格（模型实例化）。
 
 对应 Gabriel Gambetta《Computer Graphics from Scratch》中把网格顶点投影后
 用画线法绘制三角面的栅格化管线：
@@ -69,9 +69,9 @@ if __name__ == '__main__':
                  transform=Transform(1, Rotation(0, 0, 0), Vec3(1.25, 2, 7.5))),
     ]
 
-    # 渲染所有实例：每个 Instance 的顶点先经 transform（缩放→旋转→平移）变换，
-    # 再透视投影，最后逐三角面用模型自带 color 画三条边（线框，backFaceCulling=False）。
-    renderer.render_instances(instances)
+    # 渲染所有实例：RenderScene 构造相机矩阵，对每个实例合成 M = M_camera · I.transform，
+    # 再用矩阵一次性把顶点变换到相机空间、透视投影，最后逐三角面用模型自带 color 画三条边。
+    renderer.render_scene(instances)
 
     # 输出到项目根目录下的 output/（相对本脚本位置解析，运行目录无关）。
     OUTPUT_PATH: Path = Path(__file__).resolve().parent.parent / "output" / "main_draw_two_cubes.ppm"

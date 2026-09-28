@@ -6,15 +6,17 @@ from Ray import Ray
 from RayTracer import RayTracer
 from Scene import Scene
 from color.Color import Color
+from geometry.Matrix4 import Matrix4
 from geometry.Point2 import Point2
 from geometry.Point3 import Point3
 from geometry.Triangle import Triangle
 from geometry.Vec3 import Vec3
+from model.Model import Model
 from Viewport import Viewport
 
 
 class Renderer:
-    """统一渲染器：同时支持光线追踪（render）与栅格化实例渲染（render_instances）。"""
+    """统一渲染器：同时支持光线追踪（render）与栅格化实例渲染（render_scene / render_model）。"""
 
     _scene: Scene | None
     _canvas: Canvas
@@ -92,18 +94,28 @@ class Renderer:
                               triangle.color,
                               self)
 
-    def render_instance(self, instance: Instance) -> None:
-        """渲染单个模型实例（对齐 RenderInstance(instance) 伪代码）。"""
-        projected: list[Point2] = []
+    def render_model(self, model: Model, transform: Matrix4) -> None:
+        """渲染单个模型（对齐 RenderModel(model, transform) 伪代码）。
 
-        for vertex in instance.model.vertices:
-            world_vertex = instance.transform.apply(vertex)
-            projected.append(self.project_vertex(world_vertex))
+        用单个合成矩阵 transform 把每个顶点一次性变换到相机空间
+        （transform * V），再透视投影，最后逐三角面绘制。
+        """
+        projected: list[Point2] = [
+            self.project_vertex(transform.transform_point(vertex))
+            for vertex in model.vertices
+        ]
 
-        for triangle in instance.model.triangles:
+        for triangle in model.triangles:
             self.render_triangle(triangle, projected)
 
-    def render_instances(self, instances: list[Instance]) -> None:
-        """渲染一组模型实例（instancing）。"""
+    def render_scene(self, instances: list[Instance]) -> None:
+        """渲染一组实例（对齐 RenderScene() 伪代码）。
+
+        构建世界→相机矩阵 M_camera，对每个实例合成 M = M_camera · I.transform，
+        再交给 render_model 绘制。本项目的 Scene 以 spheres 存放光追物体，instances
+        由调用方持有，故此处显式接收 instances 列表（对应伪代码里的 scene.instances）。
+        """
+        m_camera = self._camera.make_camera_matrix()
         for inst in instances:
-            self.render_instance(inst)
+            m = m_camera @ inst.transform.to_matrix4()
+            self.render_model(inst.model, m)

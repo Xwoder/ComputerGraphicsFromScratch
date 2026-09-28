@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 from Number import Number
 from Rotation import Rotation
+from geometry.Matrix4 import Matrix4
 from geometry.Point3 import Point3
 from geometry.Vec3 import Vec3
 
@@ -33,3 +34,15 @@ class Transform:
         scaled = point * self.scale
         rotated = self.rotation.apply(scaled)
         return rotated + self.translation
+
+    def to_matrix4(self) -> Matrix4:
+        """把分解式变换（缩放 → 旋转 → 平移）合成为单个 4×4 齐次矩阵。
+
+        等价于 apply：M = T(translation) · R(rotation) · S(scale)，
+        于是 M · v == apply(v)。供 RenderScene 与相机矩阵合成使用。
+        """
+        return (
+            Matrix4.translation(self.translation.x, self.translation.y, self.translation.z)
+            @ Matrix4.rotation((self.rotation.x, self.rotation.y, self.rotation.z))
+            @ Matrix4.scaling(self.scale)
+        )
