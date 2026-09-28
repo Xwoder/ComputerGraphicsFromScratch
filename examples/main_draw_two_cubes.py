@@ -32,6 +32,7 @@ from model.Model import Model
 from geometry.Vec3 import Vec3
 from Renderer import Renderer
 from Rotation import Rotation
+from RasterizationScene import RasterizationScene
 from Transform import Transform
 from Viewport import Viewport
 
@@ -51,7 +52,6 @@ if __name__ == '__main__':
                                   distance=1.0)
 
     camera = Camera()  # 原点 (0,0,0)，看向 +z
-    renderer = Renderer(None, canvas, camera, viewport)  # 栅格化实例渲染，scene 传 None
 
     # 用 Model.create_cube() 构建一个共享的立方体模型。严格按 RenderInstance 伪代码，
     # 实例只靠 transform 摆放（缩放=1、无旋转），故把世界位置并入 transform.translation
@@ -59,16 +59,19 @@ if __name__ == '__main__':
     #   - 实例 1：translation = (-1.5, 0, 7)
     #   - 实例 2：translation = (1.25, 2, 7.5)
     cube = Model.create_cube()
-    instances = [
+    scene = RasterizationScene(instances=[
         Instance(cube,
                  transform=Transform(1, Rotation(0, 0, 0), Vec3(-1.5, 0, 7))),
         Instance(cube,
                  transform=Transform(1, Rotation(0, 0, 0), Vec3(1.25, 2, 7.5))),
-    ]
+    ])
 
-    # 渲染所有实例：RenderScene 构造相机矩阵，对每个实例合成 M = M_camera · I.transform，
-    # 再用矩阵一次性把顶点变换到相机空间、透视投影，最后逐三角面用模型自带 color 画三条边。
-    renderer.render_scene(instances)
+    renderer = Renderer(scene, canvas, camera, viewport)  # 栅格化实例渲染
+
+    # 渲染所有实例：RenderScene 遍历 scene.instances，对每个实例合成
+    # M = M_camera · I.transform，再用矩阵一次性把顶点变换到相机空间、透视投影，
+    # 最后逐三角面用模型自带 color 画三条边。
+    renderer.render_scene()
 
     # 输出到项目根目录下的 output/（相对本脚本位置解析，运行目录无关）。
     OUTPUT_PATH: Path = Path(__file__).resolve().parent.parent / "output" / "main_draw_two_cubes.ppm"
