@@ -27,8 +27,8 @@ from fractions import Fraction
 from Camera import Camera
 from Canvas import Canvas
 from Number import Number
-from geometry.Instance import Instance
-from geometry.Model import Model
+from Instance import Instance
+from model.Model import Model
 from geometry.Point3 import Point3
 from Rasterizer import Rasterizer
 from Viewport import Viewport
