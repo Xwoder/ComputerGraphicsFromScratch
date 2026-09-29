@@ -27,8 +27,8 @@ class Canvas:
         self._pixels[y][x] = color
 
     def draw_line(self,
-                  p0: Point3,
-                  p1: Point3,
+                  startPoint: Point3,
+                  endPoint: Point3,
                   color: Color) -> None:
         """
         Bresenham 整数直线栅格化：用 color 点亮 p0→p1 经过的所有栅格单元。
@@ -37,10 +37,10 @@ class Canvas:
         坐标可能为小数），这里先 round 吸附到最近栅格，再按标准 Bresenham
         同时处理 x 主轴与 y 主轴两种情况。
         """
-        x0: int = round(p0.x)
-        y0: int = round(p0.y)
-        x1: int = round(p1.x)
-        y1: int = round(p1.y)
+        x0: int = round(startPoint.x)
+        y0: int = round(startPoint.y)
+        x1: int = round(endPoint.x)
+        y1: int = round(endPoint.y)
 
         dx: int = abs(x1 - x0)
         dy: int = abs(y1 - y0)
