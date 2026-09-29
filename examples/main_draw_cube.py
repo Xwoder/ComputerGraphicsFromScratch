@@ -4,7 +4,7 @@
 对应 Gabriel Gambetta《Computer Graphics from Scratch》的 DrawWireframeCube：
 - 立方体的 8 个顶点以相机空间（camera space）下的 Vec3 给出；
 - 用 Camera.projectVertex 把每个顶点透视投影到画布像素坐标；
-- 用自带的 Bresenham draw_line 在 3D Canvas 上连出 12 条棱边：
+- 用 Canvas.draw_line（Bresenham 整数直线栅格化）连出 12 条棱边：
   前面 4 条为蓝色，后面 4 条为红色，连接前后的 4 条为绿色。
 
 该脚本不依赖 Canvas2D / numpy，仅复用项目已有的 Camera / Canvas / Viewport /
@@ -34,38 +34,6 @@ from geometry.Point3 import Point3
 from Viewport import Viewport
 from ImageViewer import ImageViewer
 
-
-def draw_line(canvas: Canvas, p0, p1, color: Color) -> None:
-    """
-    Bresenham 整数直线栅格化：在 3D Canvas 上用 color 点亮 p0→p1 的所有栅格单元。
-
-    p0 / p1 是 Camera.projectVertex 返回的 Point2（坐标可能为小数），这里先 round
-    吸附到最近栅格，再按标准 Bresenham 同时处理 x 主轴与 y 主轴两种情况。
-    """
-    x0: int = round(p0.x)
-    y0: int = round(p0.y)
-    x1: int = round(p1.x)
-    y1: int = round(p1.y)
-
-    dx: int = abs(x1 - x0)
-    dy: int = abs(y1 - y0)
-    sx: int = 1 if x0 < x1 else -1
-    sy: int = 1 if y0 < y1 else -1
-    err: int = dx - dy
-
-    while True:
-        canvas.putPixel(x0, y0, color)
-        if x0 == x1 and y0 == y1:
-            break
-        e2: int = 2 * err
-        if e2 > -dy:
-            err -= dy
-            x0 += sx
-        if e2 < dx:
-            err += dx
-            y0 += sy
-
-
 if __name__ == '__main__':
     ASPECT_RATIO: Fraction = Fraction(4, 3)
 
@@ -88,33 +56,33 @@ if __name__ == '__main__':
 
     # 立方体的 8 个顶点（相机空间下的空间位置点，单位与视口一致）。
     # 前面（front）z = 5，后面（back）z = 6。
-    vAf = Point3(-2, -0.5, 5)
-    vBf = Point3(-2, 0.5, 5)
-    vCf = Point3(-1, 0.5, 5)
-    vDf = Point3(-1, -0.5, 5)
+    vAf: Point3 = Point3(-2, -0.5, 5)
+    vBf: Point3 = Point3(-2, 0.5, 5)
+    vCf: Point3 = Point3(-1, 0.5, 5)
+    vDf: Point3 = Point3(-1, -0.5, 5)
 
-    vAb = Point3(-2, -0.5, 6)
-    vBb = Point3(-2, 0.5, 6)
-    vCb = Point3(-1, 0.5, 6)
-    vDb = Point3(-1, -0.5, 6)
+    vAb: Point3 = Point3(-2, -0.5, 6)
+    vBb: Point3 = Point3(-2, 0.5, 6)
+    vCb: Point3 = Point3(-1, 0.5, 6)
+    vDb: Point3 = Point3(-1, -0.5, 6)
 
     # 前面（蓝色）
-    draw_line(canvas, project(vAf), project(vBf), Color.BLUE)
-    draw_line(canvas, project(vBf), project(vCf), Color.BLUE)
-    draw_line(canvas, project(vCf), project(vDf), Color.BLUE)
-    draw_line(canvas, project(vDf), project(vAf), Color.BLUE)
+    canvas.draw_line(project(vAf), project(vBf), Color.BLUE)
+    canvas.draw_line(project(vBf), project(vCf), Color.BLUE)
+    canvas.draw_line(project(vCf), project(vDf), Color.BLUE)
+    canvas.draw_line(project(vDf), project(vAf), Color.BLUE)
 
     # 后面（红色）
-    draw_line(canvas, project(vAb), project(vBb), Color.RED)
-    draw_line(canvas, project(vBb), project(vCb), Color.RED)
-    draw_line(canvas, project(vCb), project(vDb), Color.RED)
-    draw_line(canvas, project(vDb), project(vAb), Color.RED)
+    canvas.draw_line(project(vAb), project(vBb), Color.RED)
+    canvas.draw_line(project(vBb), project(vCb), Color.RED)
+    canvas.draw_line(project(vCb), project(vDb), Color.RED)
+    canvas.draw_line(project(vDb), project(vAb), Color.RED)
 
     # 前后连接棱（绿色）
-    draw_line(canvas, project(vAf), project(vAb), Color.GREEN)
-    draw_line(canvas, project(vBf), project(vBb), Color.GREEN)
-    draw_line(canvas, project(vCf), project(vCb), Color.GREEN)
-    draw_line(canvas, project(vDf), project(vDb), Color.GREEN)
+    canvas.draw_line(project(vAf), project(vAb), Color.GREEN)
+    canvas.draw_line(project(vBf), project(vBb), Color.GREEN)
+    canvas.draw_line(project(vCf), project(vCb), Color.GREEN)
+    canvas.draw_line(project(vDf), project(vDb), Color.GREEN)
 
     # 输出到项目根目录下的 output/（相对本脚本位置解析，运行目录无关）。
     OUTPUT_PATH: Path = Path(__file__).resolve().parent.parent / "output" / "graph_cube.ppm"

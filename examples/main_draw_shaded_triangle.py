@@ -34,7 +34,7 @@ def main() -> None:
     P1 = Point2(85, 30)
     P2 = Point2(50, 90)
 
-    canvas = Canvas2D(GRID, GRID)
+    canvas: Canvas2D = Canvas2D(GRID, GRID)
 
     # 直接填充着色三角形；skip 参数已移除，内部着色会覆盖到边缘，
     # 三角形边界由下方叠加的淡灰理想轮廓作为参考显示。

@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from color.Color import Color
+from geometry.Point3 import Point3
 
 
 class Canvas:
@@ -24,6 +25,40 @@ class Canvas:
                  y: int,
                  color: Color) -> None:
         self._pixels[y][x] = color
+
+    def draw_line(self,
+                  p0: Point3,
+                  p1: Point3,
+                  color: Color) -> None:
+        """
+        Bresenham 整数直线栅格化：用 color 点亮 p0→p1 经过的所有栅格单元。
+
+        p0 / p1 是带坐标 (x, y) 的点（如 Camera.projectVertex 返回的 Point2，
+        坐标可能为小数），这里先 round 吸附到最近栅格，再按标准 Bresenham
+        同时处理 x 主轴与 y 主轴两种情况。
+        """
+        x0: int = round(p0.x)
+        y0: int = round(p0.y)
+        x1: int = round(p1.x)
+        y1: int = round(p1.y)
+
+        dx: int = abs(x1 - x0)
+        dy: int = abs(y1 - y0)
+        sx: int = 1 if x0 < x1 else -1
+        sy: int = 1 if y0 < y1 else -1
+        err: int = dx - dy
+
+        while True:
+            self.putPixel(x0, y0, color)
+            if x0 == x1 and y0 == y1:
+                break
+            e2: int = 2 * err
+            if e2 > -dy:
+                err -= dy
+                x0 += sx
+            if e2 < dx:
+                err += dx
+                y0 += sy
 
     @property
     def width(self) -> int:
