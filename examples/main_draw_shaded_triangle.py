@@ -94,7 +94,7 @@ def main() -> None:
     print(f"已保存： {OUTPUT_PATH}（基色 {base_color}，h0={h0}, h1={h1}, h2={h2}）")
 
     # 保存后自动打开图片（按平台调用系统默认查看器）
-    ImageViewer.open_image(str(OUTPUT_PATH))
+    ImageViewer.openImage(str(OUTPUT_PATH))
 
 
 if __name__ == "__main__":

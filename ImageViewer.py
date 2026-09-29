@@ -14,7 +14,7 @@ class ImageViewer:
     """调用系统默认查看器打开图片的静态工具类。"""
 
     @staticmethod
-    def open_image(path: str) -> None:
+    def openImage(path: str) -> None:
         """用系统默认程序打开给定路径的图片。
 
         path：图片文件的路径（如 "graph_line_no_interpolation.png"）。
