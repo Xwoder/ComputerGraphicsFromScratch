@@ -28,10 +28,10 @@ class PixelWriter:
             self._canvas.putPixel(xi, yi, color)
 
     def draw_wireframe_triangle(self,
-                               p0: Point2,
-                               p1: Point2,
-                               p2: Point2,
-                               color: Color) -> None:
+                                p0: Point2,
+                                p1: Point2,
+                                p2: Point2,
+                                color: Color) -> None:
         """线框三角形：用 color 画出三角形的三条边（p0→p1→p2→p0）。
 
         每条边复用 Canvas2D.draw_line（对称直线栅格化）得到被点亮的栅格单元，
@@ -90,8 +90,8 @@ class Rasterizer(PixelWriter):
 
         # ❶ 把每个顶点透视投影到画布像素坐标（ProjectVertex）
         projected: list[Point2] = [
-            Camera.projectVertex(self._canvas, self._viewport, v)
-            for v in vertices
+            Camera.projectVertex(self._canvas, self._viewport, vex)
+            for vex in vertices
         ]
 
         # ❷ 逐个三角面绘制（RenderTriangle）
