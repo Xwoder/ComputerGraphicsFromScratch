@@ -7,10 +7,12 @@ from RayTracer import RayTracer
 from RayTracingScene import RayTracingScene
 from RasterizationScene import RasterizationScene
 from color.Color import Color
+from geometry.Matrix4 import Matrix4
 from geometry.Point2 import Point2
 from geometry.Point3 import Point3
 from geometry.Triangle import Triangle
 from geometry.Vec3 import Vec3
+from model.Model import Model
 from Viewport import Viewport
 
 
@@ -90,30 +92,51 @@ class Renderer(PixelWriter):
                                      projected[triangle.vertex_indices[2]],
                                      triangle.color)
 
-    def render_instance(self, instance: Instance) -> None:
-        """渲染单个模型实例（对齐 RenderInstance(instance) 伪代码）。
+    def render_model(self, model: Model, transform: Matrix4) -> None:
+        """用变换矩阵把模型顶点变换到相机空间并逐面绘制（对齐 Listing 10-5 的 RenderModel）。
 
-            projected = []
-            for V in instance.model.vertices:
-                V' = ApplyTransform(V, instance.transform)   # instance.transform.apply(V)
-                projected.append(ProjectVertex(V'))          # self.project_vertex
-            for T in instance.model.triangles:
-                RenderTriangle(T, projected)                 # self.render_triangle
+            for V in model.vertices:
+                projected.append(ProjectVertex(transform * V))
+            for T in model.triangles:
+                RenderTriangle(T, projected)
 
-        每个顶点先经 transform（缩放→旋转→平移）变换到世界坐标，再透视投影，
-        最后逐三角面用线框绘制。
+        transform 为世界→相机空间的合成矩阵 M（= M_camera * I.transform）。
+        顶点经 M 变换到相机空间后再透视投影，最后逐三角面用线框绘制。
         """
-        model = instance.model
-
-        # 投影每个变换后的顶点（ApplyTransform + ProjectVertex）
-        projected: list[Point2] = []
-        for vertex in model.vertices:
-            world_vertex: Point3 = instance.transform.apply(vertex)
-            projected.append(self.project_vertex(world_vertex))
+        # 投影每个顶点（M * V 变换到相机空间，再 ProjectVertex）
+        projected: list[Point2] = [
+            self.project_vertex(transform.transform_point(vertex))
+            for vertex in model.vertices
+        ]
 
         # 逐个三角面绘制（RenderTriangle）
         for triangle in model.triangles:
             self.render_triangle(triangle, projected)
+
+    def render_instance(self, instance: Instance) -> None:
+        """渲染单个模型实例（对齐 RenderInstance / Listing 10-5 的矩阵合成版）。
+
+            RenderScene() {
+                M_camera = MakeCameraMatrix(camera)
+                for I in scene.instances {
+                    M = M_camera * I.transform
+                    RenderModel(I.model, M)
+                }
+            }
+
+        合成相机矩阵与实例变换：M = M_camera * I.transform，
+        再交给 render_model 用 M 一次性把顶点变换到相机空间后透视投影。
+        相机位于原点、无旋转时 M_camera 为单位矩阵，等价于原先的
+        ApplyTransform + ProjectVertex 逐顶点分解式（结果不变）。
+        """
+        model = instance.model
+
+        # M = M_camera * I.transform（相机矩阵每实例复用，可进一步优化）
+        camera_matrix: Matrix4 = self._camera.make_camera_matrix()
+        model_matrix: Matrix4 = instance.transform.to_matrix4()
+        M: Matrix4 = camera_matrix @ model_matrix
+
+        self.render_model(model, M)
 
     def render_scene(self) -> None:
         """渲染场景中的全部实例（对齐 RenderScene() 伪代码）。
