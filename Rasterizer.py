@@ -5,6 +5,7 @@ from Canvas import Canvas
 from Canvas2D import Canvas2D
 from Viewport import Viewport
 from color.Color import Color
+from geometry.Matrix4 import Matrix4
 from geometry.Point2 import Point2
 from geometry.Point3 import Point3
 from geometry.Triangle import Triangle
@@ -80,17 +81,32 @@ class Rasterizer(PixelWriter):
             self,
             vertices: list[Point3],
             triangles: list[Triangle],
+            transform: Matrix4 = Matrix4.identity(),
     ) -> None:
         """投影顶点并逐个三角面绘制，渲染一个 3D 网格物体。
 
-        流程与 RenderObject(vertices, triangles) 伪代码对齐：
-          ❶ 把每个顶点透视投影到画布像素坐标（ProjectVertex）；
+        流程与 RenderObject(vertices, triangles) 伪代码对齐，并补齐第10章
+        Listing 10-5 的相机矩阵合成（此前只把顶点当相机空间直接投影，导致
+        相机移动/旋转后结果错误，与 Renderer 修复前同一问题）：
+
+          ❶ 合成世界→相机矩阵 M = M_camera · transform，把每个顶点（世界/模型
+             空间）变换到相机空间，再透视投影到画布像素坐标（ProjectVertex）；
           ❷ 逐个三角面调用 renderTriangle 绘制。
+
+        Args:
+            vertices: 物体的顶点（世界坐标系，或模型坐标系配合 transform）。
+            triangles: 三角面列表（自带顶点索引与颜色）。
+            transform: 顶点从模型/世界空间到「相机空间前」的附加变换矩阵，
+                默认单位矩阵。若传入实例变换矩阵 I.transform，则等价于
+                M = M_camera · I.transform，与 Renderer 渲染实例的语义一致。
         """
 
-        # ❶ 把每个顶点透视投影到画布像素坐标（ProjectVertex）
+        # ❶ 合成世界→相机矩阵，变换顶点后再投影
+        camera_matrix: Matrix4 = self._camera.make_camera_matrix()
+        M: Matrix4 = camera_matrix @ transform
+
         projected: list[Point2] = [
-            Camera.projectVertex(self._canvas, self._viewport, vex)
+            Camera.projectVertex(self._canvas, self._viewport, M.transform_point(vex))
             for vex in vertices
         ]
 
