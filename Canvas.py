@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from PIL import Image
 from color.Color import Color
 from geometry.Point2 import Point2
 
@@ -95,3 +96,26 @@ class Canvas:
                     color = self._pixels[y][x]
                     row.append(" ".join(map(str, color.as_tuple())))
                 f.write(" ".join(row) + "\n")
+
+    def savePNG(self, path: Path) -> None:
+        """
+        把画布内容写成 PNG 文件（借助 Pillow）。
+
+        像素逐行（行优先，y 外层、x 内层）从 ``_pixels`` 取出，转换为
+        ``(R, G, B)`` 整数三元组后交给 Pillow 写出。颜色取值与 ``savePPM``
+        完全一致（0–255），            仅编码格式不同。
+
+        Args:
+            path (Path): 输出文件路径（通常以 ``.png`` 结尾）。
+        """
+        # 确保输出文件所在的目录存在（如默认 output/ 文件夹）。
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+        img = Image.new("RGB", (self._width, self._height))
+        pixels = [
+            self._pixels[y][x].as_tuple()
+            for y in range(self._height)
+            for x in range(self._width)
+        ]
+        img.putdata(pixels)
+        img.save(path)
