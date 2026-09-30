@@ -70,22 +70,22 @@ if __name__ == '__main__':
     vDb: Point3 = Point3(-1, -0.5, 6)
 
     # 前面（蓝色）
-    canvas.draw_line(project(vAf), project(vBf), Color.BLUE)
-    canvas.draw_line(project(vBf), project(vCf), Color.BLUE)
-    canvas.draw_line(project(vCf), project(vDf), Color.BLUE)
-    canvas.draw_line(project(vDf), project(vAf), Color.BLUE)
+    canvas.drawLine(project(vAf), project(vBf), Color.BLUE)
+    canvas.drawLine(project(vBf), project(vCf), Color.BLUE)
+    canvas.drawLine(project(vCf), project(vDf), Color.BLUE)
+    canvas.drawLine(project(vDf), project(vAf), Color.BLUE)
 
     # 后面（红色）
-    canvas.draw_line(project(vAb), project(vBb), Color.RED)
-    canvas.draw_line(project(vBb), project(vCb), Color.RED)
-    canvas.draw_line(project(vCb), project(vDb), Color.RED)
-    canvas.draw_line(project(vDb), project(vAb), Color.RED)
+    canvas.drawLine(project(vAb), project(vBb), Color.RED)
+    canvas.drawLine(project(vBb), project(vCb), Color.RED)
+    canvas.drawLine(project(vCb), project(vDb), Color.RED)
+    canvas.drawLine(project(vDb), project(vAb), Color.RED)
 
     # 前后连接棱（绿色）
-    canvas.draw_line(project(vAf), project(vAb), Color.GREEN)
-    canvas.draw_line(project(vBf), project(vBb), Color.GREEN)
-    canvas.draw_line(project(vCf), project(vCb), Color.GREEN)
-    canvas.draw_line(project(vDf), project(vDb), Color.GREEN)
+    canvas.drawLine(project(vAf), project(vAb), Color.GREEN)
+    canvas.drawLine(project(vBf), project(vBb), Color.GREEN)
+    canvas.drawLine(project(vCf), project(vCb), Color.GREEN)
+    canvas.drawLine(project(vDf), project(vDb), Color.GREEN)
 
     # 输出到项目根目录下的 output/（相对本脚本位置解析，运行目录无关）。
     OUTPUT_PATH: Path = Path(__file__).resolve().parent.parent / "output" / "graph_cube.ppm"

@@ -26,10 +26,10 @@ class Canvas:
                  color: Color) -> None:
         self._pixels[y][x] = color
 
-    def draw_line(self,
-                  startPoint: Point2,
-                  endPoint: Point2,
-                  color: Color) -> None:
+    def drawLine(self,
+                 startPoint: Point2,
+                 endPoint: Point2,
+                 color: Color) -> None:
         """
         Bresenham 整数直线栅格化：用 color 点亮 p0→p1 经过的所有栅格单元。
 
