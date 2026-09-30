@@ -25,7 +25,7 @@ from PIL import Image, ImageDraw
 from Canvas2D import Canvas2D
 from color.Color import Color
 from ImageViewer import ImageViewer
-from LineByTwoPoints import LineByTwoPoints
+from Line2ByTwoPoints import Line2ByTwoPoints
 from geometry.Point2 import Point2
 from PlotUtils import (GRID, W, H, cell_rect, point_to_image, draw_grid,
                        draw_ticks_and_labels, load_font)
@@ -38,9 +38,9 @@ def main():
     # 起点统一为 A=(0,1)（均过 (0,1)），颜色用 Color（RGB 0~255）表示，
     # 对应原 matplotlib 的 tab:red / tab:orange / tab:green。
     LINES = [
-        LineByTwoPoints(start=startPoint, end=Point2(90, 46), color=Color(255, 45, 85), name=r"y = (1/2)x + 1"),
-        LineByTwoPoints(start=startPoint, end=Point2(98, 99), color=Color(255, 153, 51), name="y = x + 1"),
-        LineByTwoPoints(start=startPoint, end=Point2(32, 97), color=Color(44, 170, 80), name="y = 3x + 1"),
+        Line2ByTwoPoints(start=startPoint, end=Point2(90, 46), color=Color(255, 45, 85), name=r"y = (1/2)x + 1"),
+        Line2ByTwoPoints(start=startPoint, end=Point2(98, 99), color=Color(255, 153, 51), name="y = x + 1"),
+        Line2ByTwoPoints(start=startPoint, end=Point2(32, 97), color=Color(44, 170, 80), name="y = 3x + 1"),
     ]
 
     print("=" * 60)

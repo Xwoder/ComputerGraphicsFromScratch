@@ -19,7 +19,7 @@ from geometry.Point2 import Point2
 
 
 @dataclass(frozen=True)
-class LineByTwoPoints:
+class Line2ByTwoPoints:
     """由两点定义的直线（两点式，带样式）。
 
     start：起点；end：终点；color：RGB 颜色（Color）；name：图例/标签名。
