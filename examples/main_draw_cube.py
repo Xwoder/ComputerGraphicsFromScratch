@@ -19,6 +19,8 @@ Color / Vec3，可独立运行。
 import sys
 from pathlib import Path
 
+from geometry.Point2 import Point2
+
 # 把项目根目录加入 sys.path（仅当尚未存在时），保证下面的顶层导入始终可用。
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
@@ -50,8 +52,9 @@ if __name__ == '__main__':
 
 
     # 便捷封装：相机空间顶点（Point3 位置点）→ 画布像素坐标（Point2）。
-    def project(v: Point3):
-        return Camera.projectVertex(canvas, viewport, v)
+    def project(point3: Point3) -> Point2:
+        vertex: Point2 = Camera.projectVertex(canvas, viewport, point3)
+        return vertex
 
 
     # 立方体的 8 个顶点（相机空间下的空间位置点，单位与视口一致）。

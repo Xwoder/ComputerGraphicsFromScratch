@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from color.Color import Color
-from geometry.Point3 import Point3
+from geometry.Point2 import Point2
 
 
 class Canvas:
@@ -27,8 +27,8 @@ class Canvas:
         self._pixels[y][x] = color
 
     def draw_line(self,
-                  startPoint: Point3,
-                  endPoint: Point3,
+                  startPoint: Point2,
+                  endPoint: Point2,
                   color: Color) -> None:
         """
         Bresenham 整数直线栅格化：用 color 点亮 p0→p1 经过的所有栅格单元。
